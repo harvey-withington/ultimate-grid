@@ -287,7 +287,13 @@ export class RenderPipeline<TData = unknown> {
         this._refreshSortIndicators();
         this._renderRows();
       }),
-      this._bus.on('filterChanged', () => this._renderRows()),
+      this._bus.on('filterChanged', (e) => {
+        if (Object.keys(e.filterState).length === 0) {
+          this._filterValues = {};
+          this._filterRow.querySelectorAll('input').forEach((inp) => { inp.value = ''; });
+        }
+        this._renderRows();
+      }),
       this._bus.on('selectionChanged', () => this._refreshSelectionClasses()),
       this._bus.on('columnResized',   () => { this._buildHeader(); this._buildFilterRow(); this._renderRows(); }),
       this._bus.on('columnMoved',     () => { this._buildHeader(); this._buildFilterRow(); this._renderRows(); }),
