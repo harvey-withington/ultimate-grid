@@ -1,0 +1,17 @@
+{
+  "name": "ultimate-grid-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Ultimate Data Grid — monorepo root",
+  "scripts": {
+    "build": "pnpm -r run build",
+    "test": "pnpm -r run test",
+    "lint": "pnpm -r run lint",
+    "dev": "pnpm --filter @ultimate-grid/core run dev"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5",
+    "vitest": "^1.6.0"
+  },
+  "license": "MIT"
+}

@@ -1,0 +1,119 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+
+    // ── Core: Build ──────────────────────────────────────────────────────────
+    {
+      "label": "core: build",
+      "type": "shell",
+      "command": "pnpm run build",
+      "options": { "cwd": "${workspaceFolder}/packages/core" },
+      "group": { "kind": "build", "isDefault": true },
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "core: build (watch)",
+      "type": "shell",
+      "command": "pnpm run dev",
+      "options": { "cwd": "${workspaceFolder}/packages/core" },
+      "isBackground": true,
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "dedicated" },
+      "problemMatcher": {
+        "owner": "typescript",
+        "pattern": "$tsc",
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^\\[\\d+:\\d+:\\d+ [AP]M\\] Starting compilation",
+          "endsPattern":   "^\\[\\d+:\\d+:\\d+ [AP]M\\] Found 0 errors"
+        }
+      }
+    },
+
+    // ── Core: Demo ───────────────────────────────────────────────────────────
+    {
+      "label": "core: demo (dev server)",
+      "type": "shell",
+      "command": "pnpm run demo",
+      "options": { "cwd": "${workspaceFolder}/packages/core" },
+      "isBackground": true,
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "dedicated" },
+      "problemMatcher": {
+        "owner": "vite",
+        "pattern": {
+          "regexp": "^(.*)$",
+          "message": 1
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "VITE",
+          "endsPattern":   "Local:\\s+http"
+        }
+      }
+    },
+
+    // ── Core: Test ───────────────────────────────────────────────────────────
+    {
+      "label": "core: test (run once)",
+      "type": "shell",
+      "command": "pnpm run test",
+      "options": { "cwd": "${workspaceFolder}/packages/core" },
+      "group": { "kind": "test", "isDefault": true },
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
+    },
+    {
+      "label": "core: test (watch)",
+      "type": "shell",
+      "command": "pnpm run test:watch",
+      "options": { "cwd": "${workspaceFolder}/packages/core" },
+      "isBackground": true,
+      "group": "test",
+      "presentation": { "reveal": "always", "panel": "dedicated" },
+      "problemMatcher": []
+    },
+    {
+      "label": "core: test (coverage)",
+      "type": "shell",
+      "command": "npx vitest run --coverage",
+      "options": { "cwd": "${workspaceFolder}/packages/core" },
+      "group": "test",
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
+    },
+
+    // ── Core: Type-check ─────────────────────────────────────────────────────
+    {
+      "label": "core: type-check",
+      "type": "shell",
+      "command": "pnpm run lint",
+      "options": { "cwd": "${workspaceFolder}/packages/core" },
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": ["$tsc"]
+    },
+
+    // ── Workspace: build / test all ──────────────────────────────────────────
+    {
+      "label": "workspace: build all",
+      "type": "shell",
+      "command": "pnpm -r run build",
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "workspace: test all",
+      "type": "shell",
+      "command": "pnpm -r run test",
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": "test",
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
+    }
+
+  ]
+}
