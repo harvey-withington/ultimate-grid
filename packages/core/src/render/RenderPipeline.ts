@@ -248,9 +248,10 @@ export class RenderPipeline<TData = unknown> {
       if (e.touches.length !== 2) return;
       e.preventDefault();
       _twoFingerActive = true;
-      const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-      const idx  = this._yToDisplayIndex(midY);
-      if (idx !== null) this._selModel.dragStart(idx, false);
+      const midY  = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+      const idx   = this._yToDisplayIndex(midY);
+      const extend = e.ctrlKey || e.metaKey;
+      if (idx !== null) this._selModel.dragStart(idx, extend);
     }, { passive: false });
 
     this._body.addEventListener('touchmove', (e) => {
