@@ -34,13 +34,13 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Type-check
-        run: pnpm -r run lint
+        run: pnpm --filter @ultimate-grid/core run lint
 
       - name: Build
-        run: pnpm -r run build
+        run: pnpm --filter @ultimate-grid/core run build
 
       - name: Test
-        run: pnpm -r run test
+        run: pnpm --filter @ultimate-grid/core run test
 
   coverage:
     name: Coverage
