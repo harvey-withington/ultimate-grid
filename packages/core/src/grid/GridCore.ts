@@ -131,11 +131,6 @@ export class GridCore<TData = unknown> {
         this._registerPlugin(plugin);
       }
     }
-
-    // 10. onGridReady callback
-    if (options.onGridReady) {
-      options.onGridReady(this.getApi());
-    }
   }
 
   // ─── Public API factory ────────────────────────────────────────────────────
@@ -317,10 +312,12 @@ export class GridCore<TData = unknown> {
     if (state.sort) {
       this._sortState = state.sort;
       this._rowModel.applySort(this._sortState);
+      this._bus.emit('sortChanged', { type: 'sortChanged', source: 'api', sortState: this._sortState });
     }
     if (state.filter) {
       this._filterState = state.filter;
       this._rowModel.applyFilter(this._filterState);
+      this._bus.emit('filterChanged', { type: 'filterChanged', source: 'api', filterState: this._filterState });
     }
     if (state.columns) {
       for (const cs of state.columns) {

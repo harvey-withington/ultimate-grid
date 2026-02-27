@@ -43,7 +43,7 @@
       "problemMatcher": {
         "owner": "vite",
         "pattern": {
-          "regexp": "^(.*)$",
+          "regexp": "^\\[vite\\]\\s+(.*error.*)$",
           "message": 1
         },
         "background": {

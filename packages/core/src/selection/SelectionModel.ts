@@ -219,6 +219,9 @@ export class SelectionModel implements ISelectionModel {
     const curRow = rows.findIndex((r) => r.rowId === this._focusedCell!.rowId);
     if (curRow === -1) return;
 
+    // For simplicity, we just navigate up/down rows for now, unless columnModel is added to selectionModel
+    // If column navigation is needed, SelectionModel would need a reference to ColumnModel
+    // to find adjacent columns. For now, we will handle row-level navigation.
     let nextIndex = curRow;
     if (direction === 'up')   nextIndex = Math.max(0, curRow - 1);
     if (direction === 'down') nextIndex = Math.min(rows.length - 1, curRow + 1);

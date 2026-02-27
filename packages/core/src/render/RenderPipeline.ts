@@ -237,7 +237,10 @@ export class RenderPipeline<TData = unknown> {
       }
     });
 
-    const endDrag = () => { this._selModel.dragEnd(); };
+    const endDrag = () => {
+      this._selModel.dragEnd();
+      setTimeout(() => { this._mouseDownOnRow = false; }, 0);
+    };
     window.addEventListener('mouseup', endDrag);
     this._unsubs.push(() => window.removeEventListener('mouseup', endDrag));
 

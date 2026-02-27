@@ -3,7 +3,6 @@ import type {
   Column,
   ColumnModel as IColumnModel,
   EventBus as IEventBus,
-  FilterState,
   SortState,
 } from '../types';
 
@@ -153,11 +152,11 @@ export class ColumnModel<TData = unknown> implements IColumnModel<TData> {
   setFilter(colId: string, filterValue: unknown): void {
     const col = this._mustGet(colId);
     col.filterActive = filterValue !== null && filterValue !== undefined;
-    this._bus.emit('filterChanged', {
-      type: 'filterChanged',
-      source: 'api',
-      filterState: this._buildFilterState(colId, filterValue),
-    });
+    
+    // We shouldn't guess the full filter state here since ColumnModel only knows about this one column's active state,
+    // not its actual value. In the new architecture, GridCore or the caller manages the full FilterState and passes it down.
+    // So ColumnModel just tracks the boolean `filterActive` flag for UI (e.g., highlighting a filter icon).
+    // The actual filtering is done via GridCore.setFilterModel which delegates to RowModel.
   }
 
   // ─── Initialisation ────────────────────────────────────────────────────────
@@ -231,17 +230,4 @@ export class ColumnModel<TData = unknown> implements IColumnModel<TData> {
     return max + 1;
   }
 
-  private _buildFilterState(colId: string, value: unknown): FilterState {
-    const state: FilterState = {};
-    for (const c of this._columns) {
-      if (c.filterActive || c.colId === colId) {
-        // Callers are responsible for passing valid ColumnFilterValue shapes.
-        // We cast here because the ColumnModel doesn't validate filter payloads —
-        // that is the FilterPlugin's responsibility.
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        state[c.colId] = (c.colId === colId ? value : true) as any;
-      }
-    }
-    return state;
-  }
 }

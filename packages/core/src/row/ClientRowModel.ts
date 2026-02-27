@@ -15,11 +15,6 @@ import type {
 
 const DEFAULT_ROW_HEIGHT = 40;
 
-let _idCounter = 0;
-function nextId(): string {
-  return `row-${++_idCounter}`;
-}
-
 /**
  * ClientRowModel
  *
@@ -43,6 +38,7 @@ export class ClientRowModel<TData = unknown> implements RowModel<TData> {
 
   private _sortState: SortState[] = [];
   private _filterState: FilterState = {};
+  private _idCounter = 0;
 
   constructor(
     private readonly _bus: IEventBus,
@@ -139,7 +135,7 @@ export class ClientRowModel<TData = unknown> implements RowModel<TData> {
   private _buildNode(data: TData, rowIndex: number): RowNode<TData> {
     const rowId = this._rowIdFn
       ? this._rowIdFn(data)
-      : nextId();
+      : `row-${++this._idCounter}`;
     return {
       rowId,
       rowType: 'data',
@@ -259,13 +255,17 @@ export class ClientRowModel<TData = unknown> implements RowModel<TData> {
   private _matchDate(raw: unknown, f: DateFilterValue): boolean {
     const cell = new Date(raw as string).getTime();
     const val  = new Date(f.value).getTime();
+    if (isNaN(val)) return true; // Invalid filter matches all
     if (isNaN(cell)) return false;
     switch (f.operator) {
       case 'equals':  return cell === val;
       case 'before':  return cell < val;
+      case 'beforeOrEqual': return cell <= val;
       case 'after':   return cell > val;
+      case 'afterOrEqual':  return cell >= val;
       case 'inRange': {
         const to = f.valueTo ? new Date(f.valueTo).getTime() : val;
+        if (isNaN(to)) return true;
         return cell >= val && cell <= to;
       }
       default: return true;

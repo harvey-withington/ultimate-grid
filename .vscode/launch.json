@@ -1,0 +1,36 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Core Tests",
+      "cwd": "${workspaceFolder}/packages/core",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["run", "test", "--run"],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Core Tests (Current File)",
+      "cwd": "${workspaceFolder}/packages/core",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["run", "test", "${fileBasenameNoExtension}", "--run"],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Debug Core Demo (Brave)",
+      "url": "http://localhost:5173",
+      "webRoot": "${workspaceFolder}/packages/core/demo",
+      "preLaunchTask": "core: demo (dev server)",
+      "runtimeExecutable": "C:/Program Files/BraveSoftware/Brave-Browser/Application/brave.exe"
+    }
+  ]
+}

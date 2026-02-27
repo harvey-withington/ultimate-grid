@@ -101,7 +101,7 @@ export function parseFilterExpression(raw: string): ColumnFilterValue | null {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 type NumOp  = 'equals' | 'notEquals' | 'lessThan' | 'lessThanOrEqual' | 'greaterThan' | 'greaterThanOrEqual' | 'inRange';
-type DateOp = 'equals' | 'before' | 'after' | 'inRange';
+type DateOp = 'equals' | 'before' | 'beforeOrEqual' | 'after' | 'afterOrEqual' | 'inRange';
 
 function cmpToNumOp(op: string): NumOp {
   switch (op) {
@@ -117,9 +117,9 @@ function cmpToNumOp(op: string): NumOp {
 function cmpToDateOp(op: string): DateOp {
   switch (op) {
     case '>':  return 'after';
-    case '>=': return 'after';
+    case '>=': return 'afterOrEqual';
     case '<':  return 'before';
-    case '<=': return 'before';
+    case '<=': return 'beforeOrEqual';
     default:   return 'equals';
   }
 }

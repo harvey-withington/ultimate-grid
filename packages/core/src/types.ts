@@ -73,7 +73,7 @@ export interface NumberFilterValue {
 
 export interface DateFilterValue {
   type: 'date';
-  operator: 'equals' | 'before' | 'after' | 'inRange';
+  operator: 'equals' | 'before' | 'beforeOrEqual' | 'after' | 'afterOrEqual' | 'inRange';
   value: string;
   valueTo?: string;
 }

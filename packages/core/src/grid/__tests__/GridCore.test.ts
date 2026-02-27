@@ -66,11 +66,10 @@ describe('GridCore', () => {
       expect(api.getFilterModel()).toHaveProperty('city');
     });
 
-    it('calls onGridReady with api', () => {
+    it('does not call onGridReady (createGrid is responsible)', () => {
       const handler = vi.fn();
       makeCore({ onGridReady: handler });
-      expect(handler).toHaveBeenCalledOnce();
-      expect(typeof handler.mock.calls[0][0].setRowData).toBe('function');
+      expect(handler).not.toHaveBeenCalled();
     });
   });
 

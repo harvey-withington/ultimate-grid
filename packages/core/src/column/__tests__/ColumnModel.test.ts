@@ -422,13 +422,12 @@ describe('ColumnModel', () => {
       expect(model.getById('name')!.filterActive).toBe(false);
     });
 
-    it('emits filterChanged event', () => {
+    it('does not emit filterChanged (GridCore owns filter dispatch)', () => {
       const { model, bus } = makeModel();
       const handler = vi.fn();
       bus.on('filterChanged', handler);
       model.setFilter('age', { type: 'number', operator: 'greaterThan', value: 18 });
-      expect(handler).toHaveBeenCalledOnce();
-      expect(handler.mock.calls[0][0].type).toBe('filterChanged');
+      expect(handler).not.toHaveBeenCalled();
     });
   });
 });
