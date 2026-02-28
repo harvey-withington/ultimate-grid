@@ -12,12 +12,9 @@
     }
   },
   "scripts": {
-    "build": "pnpm exec rollup -c rollup.config.js",
-    "demo": "pnpm exec vite",
-    "dev": "pnpm exec vite"
-  },
-  "dependencies": {
-    "@ultimate-grid/core": "workspace:*"
+    "build": "rollup -c rollup.config.js",
+    "demo": "vite",
+    "dev": "vite"
   },
   "peerDependencies": {
     "angular": "^1.8.0"

@@ -213,6 +213,7 @@ export interface ColumnDef<TData = unknown> {
   sortable?: boolean;
   comparator?: SortComparator<TData>;
   filterable?: boolean;
+  filterIcon?: boolean;
   filterType?: 'text' | 'number' | 'date' | 'set' | 'custom';
   filterParams?: Record<string, unknown>;
   editable?: boolean | EditableFn<TData>;

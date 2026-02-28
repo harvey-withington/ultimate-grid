@@ -326,6 +326,42 @@ body.demo-light {
 }
 .ugrid-cell:last-child { border-right: none; }
 
+/* ── Filter icon button (appended to cells with filterIcon: true) ──────── */
+.ugrid-filter-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  border: none;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--ugrid-text-muted, #94a3b8);
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  opacity: 0;
+  transition: opacity 0.1s, background 0.1s, color 0.1s;
+}
+.ugrid-row:hover .ugrid-filter-icon-btn {
+  opacity: 1;
+}
+.ugrid-filter-icon-btn:hover {
+  background: var(--ugrid-bg-row-hover, #f1f5f9);
+  color: var(--ugrid-text, #1a1a2e);
+}
+.ugrid-filter-icon-btn--active {
+  opacity: 1;
+  color: #3b82f6;
+}
+.ugrid-filter-icon-btn--active:hover {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
 .ugrid-cell.ugrid-cell--number {
   justify-content: flex-end;
   font-variant-numeric: tabular-nums;

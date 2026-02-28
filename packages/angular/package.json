@@ -17,9 +17,6 @@
     "build": "tsc --noEmit",
     "lint": "tsc --noEmit"
   },
-  "dependencies": {
-    "@ultimate-grid/core": "workspace:*"
-  },
   "peerDependencies": {
     "@angular/core": ">=16.0.0",
     "@angular/common": ">=16.0.0"

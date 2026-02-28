@@ -17,9 +17,6 @@
     "build": "tsc --noEmit",
     "lint": "tsc --noEmit"
   },
-  "dependencies": {
-    "@ultimate-grid/core": "workspace:*"
-  },
   "peerDependencies": {
     "vue": ">=3.0.0"
   },

@@ -6,7 +6,7 @@
     {
       "label": "core: build",
       "type": "shell",
-      "command": "pnpm run build",
+      "command": "npm run build",
       "options": { "cwd": "${workspaceFolder}/packages/core" },
       "group": { "kind": "build", "isDefault": true },
       "presentation": { "reveal": "always", "panel": "shared" },
@@ -15,7 +15,7 @@
     {
       "label": "core: build (watch)",
       "type": "shell",
-      "command": "pnpm run dev",
+      "command": "npm run dev",
       "options": { "cwd": "${workspaceFolder}/packages/core" },
       "isBackground": true,
       "group": "build",
@@ -35,7 +35,7 @@
     {
       "label": "core: demo (dev server)",
       "type": "shell",
-      "command": "pnpm run demo",
+      "command": "npm run demo",
       "options": { "cwd": "${workspaceFolder}/packages/core" },
       "isBackground": true,
       "group": "build",
@@ -58,7 +58,7 @@
     {
       "label": "angularjs: demo (dev server)",
       "type": "shell",
-      "command": "node_modules/.bin/vite --config packages/angularjs/vite.config.js",
+      "command": "vite --config packages/angularjs/vite.config.js",
       "options": { "cwd": "${workspaceFolder}" },
       "isBackground": true,
       "group": "build",
@@ -77,11 +77,34 @@
       }
     },
 
-    // ── Core: Test ───────────────────────────────────────────────────────────
+    // ── React: Demo ──────────────────────────────────────────────────────────────
+    {
+      "label": "react: demo (dev server)",
+      "type": "shell",
+      "command": "vite --config packages/react/vite.config.ts",
+      "options": { "cwd": "${workspaceFolder}" },
+      "isBackground": true,
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "dedicated" },
+      "problemMatcher": {
+        "owner": "vite",
+        "pattern": {
+          "regexp": "^\\[vite\\]\\s+(.*error.*)$",
+          "message": 1
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "VITE",
+          "endsPattern":   "Local:\\s+http"
+        }
+      }
+    },
+
+    // ── Core: Test ───────────────────────────────────────────────────────────────
     {
       "label": "core: test (run once)",
       "type": "shell",
-      "command": "pnpm run test",
+      "command": "npm run test",
       "options": { "cwd": "${workspaceFolder}/packages/core" },
       "group": { "kind": "test", "isDefault": true },
       "presentation": { "reveal": "always", "panel": "shared" },
@@ -90,7 +113,7 @@
     {
       "label": "core: test (watch)",
       "type": "shell",
-      "command": "pnpm run test:watch",
+      "command": "npm run test:watch",
       "options": { "cwd": "${workspaceFolder}/packages/core" },
       "isBackground": true,
       "group": "test",
@@ -111,7 +134,7 @@
     {
       "label": "core: type-check",
       "type": "shell",
-      "command": "pnpm run lint",
+      "command": "npm run lint",
       "options": { "cwd": "${workspaceFolder}/packages/core" },
       "group": "build",
       "presentation": { "reveal": "always", "panel": "shared" },
@@ -122,7 +145,7 @@
     {
       "label": "workspace: build all",
       "type": "shell",
-      "command": "pnpm -r run build",
+      "command": "npm run build --workspaces --if-present",
       "options": { "cwd": "${workspaceFolder}" },
       "group": "build",
       "presentation": { "reveal": "always", "panel": "shared" },
@@ -131,7 +154,7 @@
     {
       "label": "workspace: test all",
       "type": "shell",
-      "command": "pnpm -r run test",
+      "command": "npm run test --workspaces --if-present",
       "options": { "cwd": "${workspaceFolder}" },
       "group": "test",
       "presentation": { "reveal": "always", "panel": "shared" },

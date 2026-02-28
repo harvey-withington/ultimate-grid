@@ -294,6 +294,18 @@ export class RenderPipeline<TData = unknown> {
         if (Object.keys(e.filterState).length === 0) {
           this._filterValues = {};
           this._filterRow.querySelectorAll('input').forEach((inp) => { inp.value = ''; });
+        } else {
+          // Sync _filterValues with incoming state so filter-icon active state is accurate
+          for (const col of this._colModel.visible) {
+            if (!col.def.filterIcon) continue;
+            const fs = e.filterState[col.colId] as { value?: string } | undefined;
+            if (fs?.value !== undefined) {
+              // Store as =value so it matches the exactExpr format used by the icon
+              this._filterValues[col.colId] = `=${fs.value}`;
+            } else if (!(col.colId in e.filterState)) {
+              delete this._filterValues[col.colId];
+            }
+          }
         }
         this._renderRows();
       }),
@@ -376,13 +388,51 @@ export class RenderPipeline<TData = unknown> {
       if (custom) {
         cell.className = 'ugrid-cell';
         cell.appendChild(custom);
+        this._maybeAppendFilterIcon(cell, col, value);
         return cell;
       }
     }
 
     // Default rendering
     this._defaultCellRender(cell, col, value);
+    this._maybeAppendFilterIcon(cell, col, value);
     return cell;
+  }
+
+  private _maybeAppendFilterIcon(cell: HTMLElement, col: Column<TData>, value: unknown): void {
+    if (!col.def.filterIcon) return;
+    const strVal = value === null || value === undefined ? '' : String(value);
+    const activeFilter = this._filterValues[col.colId] ?? '';
+    const exactExpr = `=${strVal}`;
+    const isActive = activeFilter !== '' && activeFilter === exactExpr;
+
+    const btn = document.createElement('button');
+    btn.className = isActive
+      ? 'ugrid-filter-icon-btn ugrid-filter-icon-btn--active'
+      : 'ugrid-filter-icon-btn';
+    btn.title = isActive ? 'Clear filter' : `Filter by "${strVal}"`;
+    btn.textContent = isActive ? '✕' : '▽';
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (isActive) {
+        delete this._filterValues[col.colId];
+        this._applyFilters();
+        // Also clear the filter row input for this column
+        const input = this._filterRow.querySelector<HTMLInputElement>(
+          `.ugrid-filter-cell[data-col-id="${col.colId}"] input`
+        );
+        if (input) input.value = '';
+      } else {
+        this._filterValues[col.colId] = exactExpr;
+        this._applyFilters();
+        // Sync the filter row input for this column
+        const input = this._filterRow.querySelector<HTMLInputElement>(
+          `.ugrid-filter-cell[data-col-id="${col.colId}"] input`
+        );
+        if (input) input.value = exactExpr;
+      }
+    });
+    cell.appendChild(btn);
   }
 
   /** Override in subclasses or via cellRenderer option for custom rendering. */

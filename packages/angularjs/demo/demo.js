@@ -125,9 +125,9 @@ angular.module('ugridDemo', ['ultimateGrid'])
   vm.columnDefs = [
     { key: 'id',         field: 'id',         headerName: '#',          width: 60  },
     { key: 'name',       field: 'name',       headerName: 'Name',       width: 180 },
-    { key: 'department', field: 'department', headerName: 'Department', width: 130 },
-    { key: 'role',       field: 'role',       headerName: 'Role',       width: 100 },
-    { key: 'location',   field: 'location',   headerName: 'Location',   width: 120 },
+    { key: 'department', field: 'department', headerName: 'Department', width: 130, filterIcon: true },
+    { key: 'role',       field: 'role',       headerName: 'Role',       width: 100, filterIcon: true },
+    { key: 'location',   field: 'location',   headerName: 'Location',   width: 120, filterIcon: true },
     { key: 'salary',     field: 'salary',     headerName: 'Salary',     width: 110 },
     { key: 'score',      field: 'score',      headerName: 'Score',      width: 100 },
     { key: 'joined',     field: 'joined',     headerName: 'Joined',     width: 110 },

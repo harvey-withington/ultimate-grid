@@ -17,9 +17,6 @@
     "build": "tsc --noEmit",
     "lint": "tsc --noEmit"
   },
-  "dependencies": {
-    "@ultimate-grid/core": "workspace:*"
-  },
   "peerDependencies": {
     "svelte": ">=4.0.0"
   },
