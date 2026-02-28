@@ -344,59 +344,90 @@ function App() {
             <button className="help-close" onClick={() => setHelpOpen(false)}>&#10005;</button>
           </div>
           <div className="help-body">
+
+            {/* SELECTION */}
             <div className="help-section">
-              <h3>Selection</h3>
+              <h3>Row Selection</h3>
               <table className="help-table">
                 <thead><tr><th>Action</th><th>Result</th></tr></thead>
                 <tbody>
-                  <tr><td>Click row</td><td>Select single row (deselects others)</td></tr>
-                  <tr><td><span className="help-kbd">Ctrl</span> + Click</td><td>Toggle row in/out of selection</td></tr>
-                  <tr><td><span className="help-kbd">Shift</span> + Click</td><td>Extend selection to row (range)</td></tr>
-                  <tr><td>Click &amp; drag</td><td>Drag-select a range of rows</td></tr>
-                  <tr><td>Click empty area</td><td>Deselect all</td></tr>
+                  <tr><td><span className="help-kbd">Click</span> a row</td><td>Select that row (deselects all others). Click again to deselect.</td></tr>
+                  <tr><td><span className="help-kbd">Ctrl</span> + <span className="help-kbd">Click</span></td><td>Toggle that row on/off without affecting other selected rows.</td></tr>
+                  <tr><td><span className="help-kbd">Click</span> + drag</td><td>Drag-select a contiguous range of rows.</td></tr>
+                  <tr><td><span className="help-kbd">Ctrl</span> + drag on <em>unselected</em> row</td><td>Add dragged range to existing selection.</td></tr>
+                  <tr><td><span className="help-kbd">Ctrl</span> + drag on <em>selected</em> row</td><td>Remove dragged range from existing selection.</td></tr>
+                  <tr><td>Two-finger touch drag</td><td>Drag-select on mobile / trackpad.</td></tr>
                 </tbody>
               </table>
             </div>
+
+            {/* SORTING */}
             <div className="help-section">
               <h3>Sorting</h3>
               <table className="help-table">
                 <thead><tr><th>Action</th><th>Result</th></tr></thead>
                 <tbody>
-                  <tr><td>Click column header</td><td>Sort ascending → descending → off</td></tr>
-                  <tr><td><span className="help-kbd">Shift</span> + Click header</td><td>Add column to multi-sort</td></tr>
-                  <tr><td>✕ next to sort in stats bar</td><td>Clear all sort</td></tr>
+                  <tr><td><span className="help-kbd">Click</span> column header</td><td>Sort by that column ascending (▲). Click again for descending (▼). Third click removes sort.</td></tr>
+                  <tr><td><span className="help-kbd">Ctrl</span> + <span className="help-kbd">Click</span> header</td><td>Add as a <strong>secondary sort</strong> (multi-sort). The primary sort column is unchanged. Repeat to cycle asc → desc → off for that column independently.</td></tr>
+                  <tr><td><em>Clear Sort</em> button</td><td>Remove all active sorts.</td></tr>
                 </tbody>
               </table>
+              <p>The sort priority order is shown in the stats bar, e.g. <em>department asc, salary desc</em>.</p>
             </div>
+
+            {/* FILTERS */}
             <div className="help-section">
-              <h3>Filtering</h3>
+              <h3>Filter Expressions</h3>
+              <p>Type directly into any filter input below the column header. Expressions are parsed automatically — no need to select an operator from a dropdown.</p>
               <table className="help-table">
-                <thead><tr><th>Expression</th><th>Meaning</th></tr></thead>
+                <thead><tr><th>Expression</th><th>Type</th><th>Meaning</th></tr></thead>
                 <tbody>
-                  <tr><td><code>alice</code></td><td>Contains "alice" (case-insensitive)</td></tr>
-                  <tr><td><code>=alice</code></td><td>Exact match</td></tr>
-                  <tr><td><code>!=alice</code></td><td>Not equal</td></tr>
-                  <tr><td><code>^alice</code></td><td>Starts with</td></tr>
-                  <tr><td><code>alice$</code></td><td>Ends with</td></tr>
-                  <tr><td><code>&gt;50</code> <code>&gt;=50</code> <code>&lt;50</code></td><td>Numeric comparisons</td></tr>
-                  <tr><td><code>10..20</code></td><td>Numeric range (inclusive)</td></tr>
-                  <tr><td><code>&gt;2020-01-01</code></td><td>Date after</td></tr>
-                  <tr><td><code>2020..2022</code></td><td>Date year range</td></tr>
+                  <tr><td><code>alice</code></td><td>Text</td><td>Contains "alice" (case-insensitive)</td></tr>
+                  <tr><td><code>=Engineering</code></td><td>Text</td><td>Exactly equals "Engineering"</td></tr>
+                  <tr><td><code>!=Sales</code></td><td>Text</td><td>Does not equal "Sales"</td></tr>
+                  <tr><td><code>^A</code></td><td>Text</td><td>Starts with "A"</td></tr>
+                  <tr><td><code>on$</code></td><td>Text</td><td>Ends with "on"</td></tr>
+                  <tr><td><code>&gt;80000</code></td><td>Number</td><td>Greater than 80 000</td></tr>
+                  <tr><td><code>&gt;=50000</code></td><td>Number</td><td>Greater than or equal to 50 000</td></tr>
+                  <tr><td><code>&lt;60000</code></td><td>Number</td><td>Less than 60 000</td></tr>
+                  <tr><td><code>50000..80000</code></td><td>Number</td><td>Between 50 000 and 80 000 (inclusive)</td></tr>
+                  <tr><td><code>=75</code> or <code>75</code></td><td>Number</td><td>Exactly 75</td></tr>
+                  <tr><td><code>2020..2023</code></td><td>Date</td><td>Joined between 2020-01-01 and 2023-12-31</td></tr>
+                  <tr><td><code>2021-06..2022-03</code></td><td>Date</td><td>Joined between June 2021 and March 2022</td></tr>
+                  <tr><td><code>&gt;2022-01-01</code></td><td>Date</td><td>Joined after Jan 1 2022</td></tr>
+                  <tr><td><code>=2019-03-04</code></td><td>Date</td><td>Joined on exactly that date</td></tr>
                 </tbody>
               </table>
-              <p>Click the ▽ icon on a cell to filter by that exact value. Click ✕ on the icon to clear it.</p>
+              <p>A <strong>red border</strong> on a filter input means the expression could not be parsed.</p>
+              <p>Multiple column filters are combined with AND. Use the <em>Clear Filters</em> button to reset all at once.</p>
             </div>
+
+            {/* TOOLBAR */}
             <div className="help-section">
               <h3>Toolbar</h3>
               <table className="help-table">
                 <thead><tr><th>Button</th><th>Action</th></tr></thead>
                 <tbody>
-                  <tr><td>🌙 / ☀️</td><td>Toggle dark / light theme</td></tr>
-                  <tr><td>+ Add Row</td><td>Append a new row</td></tr>
-                  <tr><td>Remove Selected</td><td>Delete all selected rows</td></tr>
+                  <tr><td><strong>+ Add Row</strong></td><td>Appends a new randomly-generated employee row.</td></tr>
+                  <tr><td><strong>Remove Selected</strong></td><td>Permanently removes all currently-selected rows.</td></tr>
+                  <tr><td><strong>Clear Filters</strong></td><td>Resets all column filter inputs and shows all rows.</td></tr>
+                  <tr><td><strong>Clear Sort</strong></td><td>Removes all active sort columns and restores insertion order.</td></tr>
+                  <tr><td><strong>🌙 / ☀️</strong></td><td>Toggle between dark and light mode. Overrides your OS preference.</td></tr>
                 </tbody>
               </table>
             </div>
+
+            {/* KEYBOARD */}
+            <div className="help-section">
+              <h3>Keyboard Shortcuts</h3>
+              <table className="help-table">
+                <thead><tr><th>Key</th><th>Action</th></tr></thead>
+                <tbody>
+                  <tr><td><span className="help-kbd">Esc</span></td><td>Close this help panel.</td></tr>
+                </tbody>
+              </table>
+            </div>
+
           </div>
         </div>
       </div>
