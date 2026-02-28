@@ -133,6 +133,8 @@ const api: GridApi<Employee> = createGrid<Employee>({
 
 // ─── Stats bar ───────────────────────────────────────────────────────────────────────────────
 
+const btnRemove = document.getElementById('btn-remove') as HTMLButtonElement;
+
 _totalRows = 2000;
 const _statCols = COLUMN_DEFS.length;
 
@@ -183,8 +185,6 @@ api.on('selectionChanged', () => updateStats());
 updateStats();
 
 // ─── Action buttons (stats bar) ─────────────────────────────────────────────
-
-const btnRemove = document.getElementById('btn-remove') as HTMLButtonElement;
 
 document.getElementById('btn-add')!.addEventListener('click', () => {
   const id = Date.now();

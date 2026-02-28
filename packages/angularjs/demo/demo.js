@@ -10,6 +10,7 @@
  */
 
 import '../../core/src/styles/ugrid.css';
+import '../../core/demo/demo-shared.css';
 import '../src/ultimate-grid-angularjs.js';  // registers the 'ultimateGrid' module
 
 // ─── Data helpers ─────────────────────────────────────────────────────────────

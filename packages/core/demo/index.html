@@ -4,290 +4,32 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ultimate Data Grid — Demo</title>
+  <link rel="stylesheet" href="./demo-shared.css" />
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      font-size: 13px;
-      background: #f0f2f5;
-      color: #1a1a2e;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      transition: background 0.2s, color 0.2s;
-    }
-
-    /* ── Manual dark mode (toggled via JS, overrides OS preference) ── */
-    body.demo-dark {
-      background: #0f172a;
-      color: #f9fafb;
-    }
-    body.demo-dark .demo-stats {
-      background: #1f2937;
-      border-color: #374151;
-      color: #9ca3af;
-    }
-    body.demo-dark .demo-stats strong { color: #f9fafb; }
-
-    @media (prefers-color-scheme: dark) {
-      body:not(.demo-light) { background: #0f172a; color: #f9fafb; }
-      body:not(.demo-light) .demo-stats { background: #1f2937; border-color: #374151; color: #9ca3af; }
-      body:not(.demo-light) .demo-stats strong { color: #f9fafb; }
-    }
-
-    /* ── Top bar ── */
-    .demo-bar {
-      background: #1a1a2e;
-      color: #fff;
-      padding: 10px 20px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      flex-shrink: 0;
-    }
-    .demo-bar h1 { font-size: 15px; font-weight: 600; letter-spacing: 0.02em; }
-    .demo-bar > span { font-size: 11px; opacity: 0.5; }
-    .demo-controls { margin-left: auto; display: flex; gap: 8px; align-items: center; }
-    .demo-controls button {
-      background: rgba(255,255,255,0.12);
-      border: 1px solid rgba(255,255,255,0.2);
-      color: #fff;
-      padding: 4px 12px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 12px;
-      transition: background 0.15s;
-      white-space: nowrap;
-    }
-    .demo-controls button:hover { background: rgba(255,255,255,0.22); }
-    #btn-theme { font-size: 15px; padding: 2px 8px; }
-    #btn-help  { font-weight: 700; }
-
-    /* ── Stats bar ── */
-    .demo-stats {
-      background: #fff;
-      border-bottom: 1px solid #e2e5ea;
-      padding: 5px 20px;
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      font-size: 12px;
-      color: #666;
-      flex-shrink: 0;
-      transition: background 0.2s, border-color 0.2s;
-      flex-wrap: wrap;
-    }
-    .demo-stats strong { color: #1a1a2e; }
-    body.demo-dark .demo-stats strong { color: #f9fafb; }
-    @media (prefers-color-scheme: dark) {
-      body:not(.demo-light) .demo-stats strong { color: #f9fafb; }
-    }
-    .stat-item { display: flex; align-items: center; gap: 5px; white-space: nowrap; }
-    .stat-clear {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 14px; height: 14px;
-      border-radius: 50%;
-      border: none;
-      background: #cbd5e1;
-      color: #475569;
-      font-size: 9px;
-      line-height: 1;
-      cursor: pointer;
-      padding: 0;
-      flex-shrink: 0;
-      transition: background 0.15s, color 0.15s;
-    }
-    .stat-clear:hover { background: #ef4444; color: #fff; }
-    body.demo-dark .stat-clear { background: #374151; color: #9ca3af; }
-    body.demo-dark .stat-clear:hover { background: #ef4444; color: #fff; }
-    @media (prefers-color-scheme: dark) {
-      body:not(.demo-light) .stat-clear { background: #374151; color: #9ca3af; }
-      body:not(.demo-light) .stat-clear:hover { background: #ef4444; color: #fff; }
-    }
-    .stat-filter-summary { display: flex; align-items: center; gap: 5px; }
-    .stat-filter-summary .stat-filter-icon { opacity: 0.5; font-style: normal; }
-    #stat-filter-text:empty + .stat-clear { display: none; }
-    .stat-item--filter { display: none; }
-    .stat-item--filter.active { display: flex; }
-    .stat-actions { margin-left: auto; display: flex; gap: 6px; align-items: center; }
-    .stat-actions button {
-      background: #e2e8f0;
-      border: 1px solid #cbd5e1;
-      color: #334155;
-      padding: 3px 10px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 11px;
-      transition: background 0.15s;
-      white-space: nowrap;
-    }
-    .stat-actions button:hover { background: #cbd5e1; }
-    .stat-actions button:disabled { opacity: 0.4; cursor: default; }
-    body.demo-dark .stat-actions button { background: #1e293b; border-color: #374151; color: #94a3b8; }
-    body.demo-dark .stat-actions button:hover { background: #334155; color: #f1f5f9; }
-    @media (prefers-color-scheme: dark) {
-      body:not(.demo-light) .stat-actions button { background: #1e293b; border-color: #374151; color: #94a3b8; }
-      body:not(.demo-light) .stat-actions button:hover { background: #334155; color: #f1f5f9; }
-    }
-
-    /* ── Grid wrapper ── */
-    .demo-grid-wrap {
-      flex: 1;
-      padding: 16px 20px;
-      min-height: 0;
-    }
-
-    /* ══════════════════════════════════════════
-       HELP MODAL
-    ══════════════════════════════════════════ */
-    .help-backdrop {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.45);
-      z-index: 100;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-    }
-    .help-backdrop.open { display: flex; }
-
-    .help-modal {
-      background: #fff;
-      color: #1a1a2e;
-      border-radius: 10px;
-      /* width: 100%; */
-      max-width: 900px;
-      min-width: 600px;
-      max-height: 80vh;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
-      overflow: hidden;
-    }
-    body.demo-dark .help-modal { background: #1e293b; color: #f1f5f9; }
-    @media (prefers-color-scheme: dark) {
-      body:not(.demo-light) .help-modal { background: #1e293b; color: #f1f5f9; }
-    }
-
-    .help-modal-header {
-      padding: 16px 20px;
-      border-bottom: 1px solid #e5e7eb;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-shrink: 0;
-    }
-    body.demo-dark .help-modal-header {
-        border-bottom: 1px solid #0f172a;
-    }
-    .help-modal-header h2 { font-size: 15px; font-weight: 700; }
-    .help-close {
-      background: none;
-      border: none;
-      font-size: 20px;
-      cursor: pointer;
-      color: inherit;
-      opacity: 0.5;
-      line-height: 1;
-      padding: 2px 6px;
-      border-radius: 4px;
-    }
-    .help-close:hover { opacity: 1; background: rgba(0,0,0,0.06); }
-
-    .help-body {
-      padding: 20px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 22px;
-      scrollbar-color: #cbd5e1 #f1f5f9;
-    }
-    .help-body::-webkit-scrollbar        { width: 14px; }
-    .help-body::-webkit-scrollbar-track  { background: #f1f5f9; border-radius: 4px; }
-    .help-body::-webkit-scrollbar-thumb  { background: #cbd5e1; border-radius: 4px; }
-    .help-body::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
-    body.demo-dark .help-body { scrollbar-color: #475569 #1e293b; }
-    body.demo-dark .help-body::-webkit-scrollbar-track { background: #1e293b; }
-    body.demo-dark .help-body::-webkit-scrollbar-thumb { background: #475569; border-color: #1e293b; }
-    body.demo-dark .help-body::-webkit-scrollbar-thumb:hover { background: #64748b; }
-    @media (prefers-color-scheme: dark) {
-      body:not(.demo-light) .help-body { scrollbar-color: #475569 #1e293b; }
-      body:not(.demo-light) .help-body::-webkit-scrollbar-track { background: #1e293b; }
-      body:not(.demo-light) .help-body::-webkit-scrollbar-thumb { background: #475569; border-color: #1e293b; }
-      body:not(.demo-light) .help-body::-webkit-scrollbar-thumb:hover { background: #64748b; }
-    }
-
-    .help-section h3 {
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: #2563eb;
-      margin-bottom: 10px;
-    }
-    body.demo-dark .help-section h3 { color: #60a5fa; }
-
-    .help-section p {
-      font-size: 13px;
-      line-height: 1.6;
-      color: inherit;
-      opacity: 0.85;
-      margin-top: 8px;
-    }
-
-    .help-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 12px;
-    }
-    .help-table th {
-      text-align: left;
-      padding: 5px 10px;
-      background: #f1f5f9;
-      font-weight: 600;
-      border-bottom: 1px solid #e2e8f0;
-      color: #475569;
-      white-space: nowrap;
-    }
-    body.demo-dark .help-table th { background: #0f172a; color: #94a3b8; border-color: #334155; }
-    .help-table td {
-      padding: 5px 10px;
-      border-bottom: 1px solid #f1f5f9;
-      vertical-align: top;
-    }
-    .help-table td:first-child {
-      white-space: nowrap;
-    }
-    body.demo-dark .help-table td { border-color: #1e293b; }
-    .help-table tr:last-child td { border-bottom: none; }
-    .help-table code {
-      font-family: 'JetBrains Mono', 'Fira Code', monospace;
-      background: #f1f5f9;
-      padding: 1px 5px;
-      border-radius: 3px;
-      font-size: 11px;
-      color: #0f172a;
-    }
-    body.demo-dark .help-table code { background: #0f172a; color: #e2e8f0; }
-
-    .help-kbd {
+    /* ── Core demo-specific: score bar cell renderer ── */
+    .ugrid-cell--score  { gap: 8px; }
+    .ugrid-score-bar {
       display: inline-block;
-      background: #f1f5f9;
-      border: 1px solid #cbd5e1;
-      border-radius: 4px;
-      padding: 1px 7px;
-      font-size: 11px;
-      font-family: inherit;
-      font-weight: 600;
-      color: #334155;
-      box-shadow: 0 1px 0 #cbd5e1;
+      width: 60px; height: 6px;
+      background: #e2e8f0;
+      border-radius: 3px;
+      position: relative;
+      flex-shrink: 0;
     }
-    body.demo-dark .help-kbd { background: #1e293b; border-color: #475569; color: #cbd5e1; box-shadow: 0 1px 0 #475569; }
+    .ugrid-score-bar::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      width: var(--score-pct, 0%);
+      background: #3b82f6;
+      border-radius: 3px;
+    }
+    .ugrid-score-label { font-size: 11px; color: #64748b; }
+    .ugrid-cell--badge span {
+      background: #ede9fe; color: #6d28d9;
+      padding: 1px 7px; border-radius: 10px; font-size: 11px;
+    }
+    .ugrid-cell--number { justify-content: flex-end; font-variant-numeric: tabular-nums; }
   </style>
 </head>
 <body>

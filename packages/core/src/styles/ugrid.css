@@ -278,6 +278,8 @@ body.demo-light {
   flex: 1;
   overflow: auto;
   position: relative;
+  -webkit-user-select: none;
+  user-select: none;
   min-height: 0;
 }
 
