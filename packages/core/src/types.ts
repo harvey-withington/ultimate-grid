@@ -52,7 +52,7 @@ export type SortComparator<TData = unknown> = (
 
 export interface TextFilterValue {
   type: 'text';
-  operator: 'contains' | 'notContains' | 'equals' | 'notEquals' | 'startsWith' | 'endsWith';
+  operator: 'contains' | 'notContains' | 'equals' | 'notEquals' | 'startsWith' | 'endsWith' | 'regex';
   value: string;
   caseSensitive?: boolean;
 }

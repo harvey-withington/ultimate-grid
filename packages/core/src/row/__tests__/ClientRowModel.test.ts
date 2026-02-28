@@ -298,6 +298,26 @@ describe('ClientRowModel', () => {
       // Alice, Dave, Eve
       expect(model.displayRowCount).toBe(3);
     });
+
+    it('regex (case-insensitive by default)', () => {
+      const { model } = makeModel();
+      model.setRowData(ALL);
+      model.applyFilter({ city: { type: 'text', operator: 'regex', value: '^(l|p)', caseSensitive: false } });
+      // London, Paris -> Alice, Bob, Carol, Eve
+      expect(model.displayRowCount).toBe(4);
+      const names = model.displayRows.map(r => r.data!.name).sort();
+      expect(names).toEqual(['Alice', 'Bob', 'Carol', 'Eve']);
+    });
+
+    it('regex (case-sensitive)', () => {
+      const { model } = makeModel();
+      model.setRowData(ALL);
+      model.applyFilter({ city: { type: 'text', operator: 'regex', value: '^L', caseSensitive: true } });
+      // London -> Alice, Carol
+      expect(model.displayRowCount).toBe(2);
+      const names = model.displayRows.map(r => r.data!.name).sort();
+      expect(names).toEqual(['Alice', 'Carol']);
+    });
   });
 
   describe('applyFilter — number', () => {

@@ -80,6 +80,15 @@ export function parseFilterExpression(raw: string): ColumnFilterValue | null {
     if (op === '!=') return { type: 'text', operator: 'notEquals', value: val };
   }
 
+  // ── Regex ─────────────────────────────────────────────────────────────────
+  const regexMatch = s.match(/^\/(.+)\/([gimsuy]*)$/);
+  if (regexMatch) {
+    const pattern = regexMatch[1];
+    const flags = regexMatch[2];
+    const caseSensitive = !flags.includes('i');
+    return { type: 'text', operator: 'regex', value: pattern, caseSensitive };
+  }
+
   // ── Text prefix anchors ───────────────────────────────────────────────────
   if (s.startsWith('^')) {
     return { type: 'text', operator: 'startsWith', value: s.slice(1) };

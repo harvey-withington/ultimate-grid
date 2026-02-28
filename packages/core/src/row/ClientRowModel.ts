@@ -224,6 +224,15 @@ export class ClientRowModel<TData = unknown> implements RowModel<TData> {
   }
 
   private _matchText(raw: unknown, f: TextFilterValue): boolean {
+    if (f.operator === 'regex') {
+      try {
+        const regex = new RegExp(f.value, f.caseSensitive ? '' : 'i');
+        return regex.test(String(raw ?? ''));
+      } catch (e) {
+        return false;
+      }
+    }
+
     const cell = f.caseSensitive ? String(raw ?? '') : String(raw ?? '').toLowerCase();
     const val  = f.caseSensitive ? f.value : f.value.toLowerCase();
     switch (f.operator) {
