@@ -41,24 +41,25 @@ const ROLES       = ['Junior', 'Mid', 'Senior', 'Lead', 'Manager', 'Director'];
 const NAMES       = [
   'Alice Chen', 'Bob Martin', 'Carol White', 'Dave Singh', 'Eve Johnson',
   'Frank Kim', 'Grace Liu', 'Henry Park', 'Iris Torres', 'Jack Brown',
-  'Kate Wilson', 'Leo Zhang', 'Mia Patel', 'Noah Garcia', 'Olivia Davis',
+  'Karen Davis', 'Leo Zhang', 'Mia Patel', 'Noah Wilson', 'Olivia Moore',
+  'Paul Taylor', 'Quinn Anderson', 'Rachel Harris', 'Sam Jackson', 'Tina Lee',
+  'Uma Sharma', 'Victor Ng', 'Wendy Clark', 'Xander Lewis', 'Yara Scott',
 ];
 
 function generateData(count: number): Employee[] {
   const rows: Employee[] = [];
-  for (let i = 1; i <= count; i++) {
-    const year  = 2015 + (i % 9);
-    const month = String((i % 12) + 1).padStart(2, '0');
-    const day   = String((i % 28) + 1).padStart(2, '0');
+  for (let i = 0; i < count; i++) {
+    const nameIdx = i % NAMES.length;
+    const suffix = i >= NAMES.length ? ` ${Math.floor(i / NAMES.length) + 1}` : '';
     rows.push({
-      id:         i,
-      name:       NAMES[i % NAMES.length] + (i > NAMES.length ? ` ${Math.floor(i / NAMES.length)}` : ''),
+      id:         i + 1,
+      name:       NAMES[nameIdx] + suffix,
       department: DEPARTMENTS[i % DEPARTMENTS.length],
       role:       ROLES[i % ROLES.length],
+      salary:     40000 + Math.floor((i * 3731 + 17) % 120000),
+      score:      Math.floor((i * 97 + 13) % 101),
       location:   LOCATIONS[i % LOCATIONS.length],
-      salary:     45000 + (i % 20) * 5000,
-      score:      Math.round((((i * 37) % 100) + 1)),
-      joined:     `${year}-${month}-${day}`,
+      joined:     `${2015 + (i % 10)}-${String((i % 12) + 1).padStart(2, '0')}-${String((i % 28) + 1).padStart(2, '0')}`,
       active:     i % 7 !== 0,
     });
   }

@@ -35,40 +35,6 @@
 
     /* Hide ng-cloak elements until AngularJS has compiled the template */
     .ng-cloak { visibility: hidden; }
-
-    /* Code snippet panel */
-    .demo-code-panel {
-      background: #1e293b;
-      color: #e2e8f0;
-      border-top: 1px solid #334155;
-      padding: 0;
-      flex-shrink: 0;
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.3s ease;
-    }
-    .demo-code-panel.open { max-height: 260px; }
-    .demo-code-inner {
-      padding: 16px 20px;
-      overflow-y: auto;
-      max-height: 260px;
-    }
-    .demo-code-panel pre {
-      font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
-      font-size: 11.5px;
-      line-height: 1.6;
-      white-space: pre;
-      tab-size: 2;
-    }
-    .demo-code-panel .tok-tag    { color: #f472b6; }
-    .demo-code-panel .tok-attr   { color: #93c5fd; }
-    .demo-code-panel .tok-val    { color: #86efac; }
-    .demo-code-panel .tok-ctrl   { color: #fde68a; }
-    .demo-code-panel .tok-cmt    { color: #64748b; font-style: italic; }
-    .demo-code-panel .tok-punct  { color: #94a3b8; }
-
-    /* Code button monospace font */
-    #btn-code { font-family: 'JetBrains Mono', monospace; }
   </style>
 </head>
 
@@ -82,7 +48,6 @@
 
     <div class="demo-controls">
       <button class="btn-theme" ng-click="vm.toggleTheme()" title="{{vm.themeTitle}}">{{vm.themeIcon}}</button>
-      <button id="btn-code" ng-click="vm.showCode = !vm.showCode">&lt;/&gt; Code</button>
       <button id="btn-help" ng-click="vm.helpOpen = true">? Help</button>
     </div>
   </div>
@@ -109,33 +74,6 @@
     </span>
   </div>
 
-  <!-- ── Code snippet panel ────────────────────────────────────────────────── -->
-  <div class="demo-code-panel" ng-class="{open: vm.showCode}">
-    <div class="demo-code-inner">
-      <pre><span class="tok-cmt">&lt;!-- 1. Load AngularJS + the wrapper --&gt;</span>
-<span class="tok-tag">&lt;script</span> <span class="tok-attr">src</span><span class="tok-punct">="</span><span class="tok-val">angular.min.js</span><span class="tok-punct">"&gt;&lt;/script&gt;</span>
-<span class="tok-tag">&lt;script</span> <span class="tok-attr">type</span><span class="tok-punct">="</span><span class="tok-val">module</span><span class="tok-punct">"</span> <span class="tok-attr">src</span><span class="tok-punct">="</span><span class="tok-val">ultimate-grid-angularjs.js</span><span class="tok-punct">"&gt;&lt;/script&gt;</span>
-
-<span class="tok-cmt">&lt;!-- 2. Declare dependency --&gt;</span>
-<span class="tok-ctrl">angular</span>.module(<span class="tok-val">'myApp'</span>, [<span class="tok-val">'ultimateGrid'</span>])
-
-<span class="tok-cmt">&lt;!-- 3. Drop the directive in your template --&gt;</span>
-<span class="tok-tag">&lt;ultimate-grid</span>
-  <span class="tok-attr">column-defs</span><span class="tok-punct">="</span><span class="tok-val">vm.columnDefs</span><span class="tok-punct">"</span>
-  <span class="tok-attr">row-data</span><span class="tok-punct">="</span><span class="tok-val">vm.rowData</span><span class="tok-punct">"</span>
-  <span class="tok-attr">options</span><span class="tok-punct">="</span><span class="tok-val">vm.gridOptions</span><span class="tok-punct">"</span>
-  <span class="tok-attr">selection-mode</span><span class="tok-punct">="</span><span class="tok-val">multi</span><span class="tok-punct">"</span>
-  <span class="tok-attr">on-grid-ready</span><span class="tok-punct">="</span><span class="tok-val">vm.onGridReady(api)</span><span class="tok-punct">"</span>
-  <span class="tok-attr">api</span><span class="tok-punct">="</span><span class="tok-val">vm.gridApi</span><span class="tok-punct">"&gt;</span>
-<span class="tok-tag">&lt;/ultimate-grid&gt;</span>
-
-<span class="tok-cmt">&lt;!-- 4. Listen to grid events --&gt;</span>
-<span class="tok-ctrl">$rootScope</span>.$on(<span class="tok-val">'ugrid:selectionChanged'</span>, <span class="tok-ctrl">function</span>(_, e) {
-  vm.selectedCount = e.selectedRowIds.length;
-});</pre>
-    </div>
-  </div>
-
   <!-- ── Grid ──────────────────────────────────────────────────────────────── -->
   <div class="demo-grid-wrap">
     <ultimate-grid
@@ -153,7 +91,7 @@
     <div class="help-modal" role="dialog" aria-modal="true">
       <div class="help-modal-header">
         <h2>⚡ Ultimate Data Grid — Quick Reference</h2>
-        <button class="help-close" ng-click="vm.helpOpen = false" aria-label="Close">✕</button>
+        <button class="help-close" ng-click="vm.helpOpen = false; $event.stopPropagation()" aria-label="Close">✕</button>
       </div>
       <div class="help-body">
 
@@ -225,7 +163,6 @@
               <tr><td><strong>Clear Filters</strong></td><td>Resets all column filter inputs and shows all rows.</td></tr>
               <tr><td><strong>Clear Sort</strong></td><td>Removes all active sort columns and restores insertion order.</td></tr>
               <tr><td><strong>🌙 / ☀️</strong></td><td>Toggle between dark and light mode. Overrides your OS preference.</td></tr>
-              <tr><td><strong>&lt;/&gt; Code</strong></td><td>Show/hide usage code snippet.</td></tr>
             </tbody>
           </table>
         </div>
