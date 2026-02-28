@@ -266,7 +266,7 @@ body.demo-light {
   bottom: 1px;
   width: 24px;
   border-radius: 0 3px 3px 0;
-  background: linear-gradient(to right, transparent, var(--ugrid-bg-filter-input) 75%);
+  background: linear-gradient(to right, transparent, var(--ugrid-bg-filter-input) 50%);
   pointer-events: none;
   transition: opacity 0.1s;
 }
@@ -406,7 +406,7 @@ body.demo-light {
   z-index: 1;
 }
 .ugrid-filter-clear-btn:hover {
-  background: #fee2e2;
+  background: var(--ugrid-bg-filter-focus, #f8fafc);
   color: #ef4444;
 }
 
