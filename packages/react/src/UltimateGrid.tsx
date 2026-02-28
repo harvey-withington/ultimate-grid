@@ -10,8 +10,11 @@
  *     rowData={rowData}
  *     selectionMode="multi"
  *     rowHeight={36}
+ *     cellRenderer={customCellRenderer}
  *     onGridReady={(api) => setGridApi(api)}
- *     onSelectionChanged={(e) => console.log(e)}
+ *     onSortChanged={handleSortChanged}
+ *     onFilterChanged={handleFilterChanged}
+ *     onSelectionChanged={handleSelectionChanged}
  *   />
  */
 
