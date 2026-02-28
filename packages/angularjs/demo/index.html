@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="ugridDemo">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ultimate Data Grid — AngularJS Demo</title>
+
+  <!-- Pause ng-app auto-bootstrap until our ES module has registered its modules -->
+  <script>window.name = 'NG_DEFER_BOOTSTRAP!' + (window.name || '');</script>
+  <!-- AngularJS v1 from CDN -->
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 13px;
+      background: #f0f2f5;
+      color: #1a1a2e;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    body.demo-dark  { background: #0f172a; color: #f9fafb; }
+    body.demo-light { background: #f0f2f5; color: #1a1a2e; }
+
+    body.demo-dark  .demo-stats { background: #1f2937; border-color: #374151; color: #9ca3af; }
+    body.demo-dark  .demo-stats strong { color: #f9fafb; }
+
+    @media (prefers-color-scheme: dark) {
+      body:not(.demo-light) { background: #0f172a; color: #f9fafb; }
+      body:not(.demo-light) .demo-stats { background: #1f2937; border-color: #374151; color: #9ca3af; }
+      body:not(.demo-light) .demo-stats strong { color: #f9fafb; }
+    }
+
+    /* ── Top bar ─────────────────────────────────────────────────────────── */
+    .demo-bar {
+      background: #1a1a2e;
+      color: #fff;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-shrink: 0;
+    }
+    .demo-bar h1     { font-size: 15px; font-weight: 600; letter-spacing: 0.02em; }
+    .demo-bar > span { font-size: 11px; opacity: 0.5; }
+
+    .demo-badge {
+      background: rgba(96, 165, 250, 0.2);
+      border: 1px solid rgba(96, 165, 250, 0.5);
+      color: #93c5fd;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 12px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .demo-controls { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+    .demo-controls button {
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #fff;
+      padding: 4px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+    .demo-controls button:hover { background: rgba(255,255,255,0.22); }
+    .btn-theme { font-size: 15px; padding: 2px 8px !important; }
+
+    /* ── Stats bar ───────────────────────────────────────────────────────── */
+    .demo-stats {
+      background: #fff;
+      border-bottom: 1px solid #e2e5ea;
+      padding: 6px 20px;
+      display: flex;
+      gap: 24px;
+      font-size: 12px;
+      color: #666;
+      flex-shrink: 0;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .demo-stats strong { color: #1a1a2e; }
+
+    /* ── Grid wrapper ────────────────────────────────────────────────────── */
+    .demo-grid-wrap {
+      flex: 1;
+      padding: 16px 20px;
+      min-height: 0;
+    }
+
+    ultimate-grid {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* ── AngularJS badge decoration ─────────────────────────────────────── */
+    .ng-cloak { visibility: hidden; }
+
+    /* ── Code snippet panel ──────────────────────────────────────────────── */
+    .demo-code-panel {
+      background: #1e293b;
+      color: #e2e8f0;
+      border-top: 1px solid #334155;
+      padding: 0;
+      flex-shrink: 0;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+    .demo-code-panel.open {
+      max-height: 260px;
+    }
+    .demo-code-inner {
+      padding: 16px 20px;
+      overflow-y: auto;
+      max-height: 260px;
+    }
+    .demo-code-panel pre {
+      font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+      font-size: 11.5px;
+      line-height: 1.6;
+      white-space: pre;
+      tab-size: 2;
+    }
+    .demo-code-panel .tok-tag    { color: #f472b6; }
+    .demo-code-panel .tok-attr   { color: #93c5fd; }
+    .demo-code-panel .tok-val    { color: #86efac; }
+    .demo-code-panel .tok-ctrl   { color: #fde68a; }
+    .demo-code-panel .tok-cmt    { color: #64748b; font-style: italic; }
+    .demo-code-panel .tok-punct  { color: #94a3b8; }
+
+    #btn-code { font-family: 'JetBrains Mono', monospace; }
+  </style>
+</head>
+
+<body ng-controller="DemoCtrl as vm" ng-cloak>
+
+  <!-- ── Top bar ──────────────────────────────────────────────────────────── -->
+  <div class="demo-bar">
+    <h1>⚡ Ultimate Data Grid</h1>
+    <span>AngularJS wrapper demo</span>
+    <span class="demo-badge">AngularJS 1.8</span>
+
+    <div class="demo-controls">
+      <button ng-click="vm.addRow()">+ Add Row</button>
+      <button ng-click="vm.removeSelected()">Remove Selected</button>
+      <button ng-click="vm.clearFilters()">Clear Filters</button>
+      <button ng-click="vm.clearSort()">Clear Sort</button>
+      <button class="btn-theme" ng-click="vm.toggleTheme()" title="{{vm.themeTitle}}">{{vm.themeIcon}}</button>
+      <button id="btn-code" ng-click="vm.showCode = !vm.showCode">&lt;/&gt; Code</button>
+    </div>
+  </div>
+
+  <!-- ── Stats bar ────────────────────────────────────────────────────────── -->
+  <div class="demo-stats">
+    <span>Showing <strong>{{vm.stats.showing}}</strong> of <strong>{{vm.stats.total}}</strong> rows</span>
+    <span>Columns: <strong>{{vm.stats.cols}}</strong></span>
+    <span>Sort: <strong>{{vm.stats.sort}}</strong></span>
+    <span>Selected: <strong>{{vm.stats.selected}}</strong></span>
+  </div>
+
+  <!-- ── Code snippet panel ────────────────────────────────────────────────── -->
+  <div class="demo-code-panel" ng-class="{open: vm.showCode}">
+    <div class="demo-code-inner">
+      <pre><span class="tok-cmt">&lt;!-- 1. Load AngularJS + the wrapper --&gt;</span>
+<span class="tok-tag">&lt;script</span> <span class="tok-attr">src</span><span class="tok-punct">="</span><span class="tok-val">angular.min.js</span><span class="tok-punct">"&gt;&lt;/script&gt;</span>
+<span class="tok-tag">&lt;script</span> <span class="tok-attr">type</span><span class="tok-punct">="</span><span class="tok-val">module</span><span class="tok-punct">"</span> <span class="tok-attr">src</span><span class="tok-punct">="</span><span class="tok-val">ultimate-grid-angularjs.js</span><span class="tok-punct">"&gt;&lt;/script&gt;</span>
+
+<span class="tok-cmt">&lt;!-- 2. Declare dependency --&gt;</span>
+<span class="tok-ctrl">angular</span>.module(<span class="tok-val">'myApp'</span>, [<span class="tok-val">'ultimateGrid'</span>])
+
+<span class="tok-cmt">&lt;!-- 3. Drop the directive in your template --&gt;</span>
+<span class="tok-tag">&lt;ultimate-grid</span>
+  <span class="tok-attr">column-defs</span><span class="tok-punct">="</span><span class="tok-val">vm.columnDefs</span><span class="tok-punct">"</span>
+  <span class="tok-attr">row-data</span><span class="tok-punct">="</span><span class="tok-val">vm.rowData</span><span class="tok-punct">"</span>
+  <span class="tok-attr">options</span><span class="tok-punct">="</span><span class="tok-val">vm.gridOptions</span><span class="tok-punct">"</span>
+  <span class="tok-attr">selection-mode</span><span class="tok-punct">="</span><span class="tok-val">multi</span><span class="tok-punct">"</span>
+  <span class="tok-attr">on-grid-ready</span><span class="tok-punct">="</span><span class="tok-val">vm.onGridReady(api)</span><span class="tok-punct">"</span>
+  <span class="tok-attr">api</span><span class="tok-punct">="</span><span class="tok-val">vm.gridApi</span><span class="tok-punct">"&gt;</span>
+<span class="tok-tag">&lt;/ultimate-grid&gt;</span>
+
+<span class="tok-cmt">&lt;!-- 4. Listen to grid events --&gt;</span>
+<span class="tok-ctrl">$rootScope</span>.$on(<span class="tok-val">'ugrid:selectionChanged'</span>, <span class="tok-ctrl">function</span>(_, e) {
+  vm.selectedCount = e.selectedRowIds.length;
+});</pre>
+    </div>
+  </div>
+
+  <!-- ── Grid ──────────────────────────────────────────────────────────────── -->
+  <div class="demo-grid-wrap">
+    <ultimate-grid
+      column-defs="vm.columnDefs"
+      row-data="vm.rowData"
+      options="vm.gridOptions"
+      selection-mode="multi"
+      on-grid-ready="vm.onGridReady(api)"
+      api="vm.gridApi">
+    </ultimate-grid>
+  </div>
+
+  <script type="module" src="./demo.js"></script>
+</body>
+</html>

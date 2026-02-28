@@ -105,7 +105,7 @@ function employeeCellRenderer(col: Column, node: RowNode, value: unknown): HTMLE
 
     case 'active':
       cell.className = 'ugrid-cell';
-      cell.textContent = value ? '✅' : '—';
+      cell.textContent = value ? '☑' : '⮽';
       return cell;
 
     default:

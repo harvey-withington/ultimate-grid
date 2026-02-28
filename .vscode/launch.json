@@ -31,6 +31,15 @@
       "webRoot": "${workspaceFolder}/packages/core/demo",
       "preLaunchTask": "core: demo (dev server)",
       "runtimeExecutable": "C:/Program Files/BraveSoftware/Brave-Browser/Application/brave.exe"
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Debug AngularJS Demo (Brave)",
+      "url": "http://localhost:5174",
+      "webRoot": "${workspaceFolder}/packages/angularjs/demo",
+      "preLaunchTask": "angularjs: demo (dev server)",
+      "runtimeExecutable": "C:/Program Files/BraveSoftware/Brave-Browser/Application/brave.exe"
     }
   ]
 }

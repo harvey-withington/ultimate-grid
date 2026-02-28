@@ -1,0 +1,27 @@
+{
+  "name": "@ultimate-grid/angularjs",
+  "version": "0.1.0",
+  "description": "Ultimate Data Grid — AngularJS (v1) wrapper & directive",
+  "type": "module",
+  "main": "./dist/ultimate-grid-angularjs.cjs",
+  "module": "./dist/ultimate-grid-angularjs.js",
+  "exports": {
+    ".": {
+      "import": "./dist/ultimate-grid-angularjs.js",
+      "require": "./dist/ultimate-grid-angularjs.cjs"
+    }
+  },
+  "scripts": {
+    "build": "pnpm exec rollup -c rollup.config.js",
+    "demo": "pnpm exec vite",
+    "dev": "pnpm exec vite"
+  },
+  "dependencies": {
+    "@ultimate-grid/core": "workspace:*"
+  },
+  "peerDependencies": {
+    "angular": "^1.8.0"
+  },
+  "devDependencies": {},
+  "license": "MIT"
+}

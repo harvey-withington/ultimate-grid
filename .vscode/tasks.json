@@ -54,6 +54,29 @@
       }
     },
 
+    // ── AngularJS: Demo ──────────────────────────────────────────────────────
+    {
+      "label": "angularjs: demo (dev server)",
+      "type": "shell",
+      "command": "node_modules/.bin/vite --config packages/angularjs/vite.config.js",
+      "options": { "cwd": "${workspaceFolder}" },
+      "isBackground": true,
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "dedicated" },
+      "problemMatcher": {
+        "owner": "vite",
+        "pattern": {
+          "regexp": "^\\[vite\\]\\s+(.*error.*)$",
+          "message": 1
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "VITE",
+          "endsPattern":   "Local:\\s+http"
+        }
+      }
+    },
+
     // ── Core: Test ───────────────────────────────────────────────────────────
     {
       "label": "core: test (run once)",
