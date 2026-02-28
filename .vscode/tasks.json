@@ -7,7 +7,7 @@
       "label": "core: build",
       "type": "shell",
       "command": "npm run build",
-      "options": { "cwd": "${workspaceFolder}/packages/core" },
+      "options": { "cwd": "${workspaceFolder}" },
       "group": { "kind": "build", "isDefault": true },
       "presentation": { "reveal": "always", "panel": "shared" },
       "problemMatcher": ["$tsc"]
@@ -16,7 +16,7 @@
       "label": "core: build (watch)",
       "type": "shell",
       "command": "npm run dev",
-      "options": { "cwd": "${workspaceFolder}/packages/core" },
+      "options": { "cwd": "${workspaceFolder}" },
       "isBackground": true,
       "group": "build",
       "presentation": { "reveal": "always", "panel": "dedicated" },
@@ -35,8 +35,8 @@
     {
       "label": "core: demo (dev server)",
       "type": "shell",
-      "command": "npm run demo",
-      "options": { "cwd": "${workspaceFolder}/packages/core" },
+      "command": "npm run dev",
+      "options": { "cwd": "${workspaceFolder}" },
       "isBackground": true,
       "group": "build",
       "presentation": { "reveal": "always", "panel": "dedicated" },
@@ -58,7 +58,7 @@
     {
       "label": "angularjs: demo (dev server)",
       "type": "shell",
-      "command": "vite --config packages/angularjs/vite.config.js",
+      "command": "node_modules\\.bin\\vite --config packages/angularjs/vite.config.js",
       "options": { "cwd": "${workspaceFolder}" },
       "isBackground": true,
       "group": "build",
@@ -81,7 +81,7 @@
     {
       "label": "react: demo (dev server)",
       "type": "shell",
-      "command": "vite --config packages/react/vite.config.ts",
+      "command": "node_modules\\.bin\\vite --config packages/react/vite.config.ts",
       "options": { "cwd": "${workspaceFolder}" },
       "isBackground": true,
       "group": "build",
@@ -104,8 +104,8 @@
     {
       "label": "core: test (run once)",
       "type": "shell",
-      "command": "npm run test",
-      "options": { "cwd": "${workspaceFolder}/packages/core" },
+      "command": "npm test",
+      "options": { "cwd": "${workspaceFolder}" },
       "group": { "kind": "test", "isDefault": true },
       "presentation": { "reveal": "always", "panel": "shared" },
       "problemMatcher": []
@@ -113,8 +113,8 @@
     {
       "label": "core: test (watch)",
       "type": "shell",
-      "command": "npm run test:watch",
-      "options": { "cwd": "${workspaceFolder}/packages/core" },
+      "command": "node_modules\\.bin\\vitest --root packages/core",
+      "options": { "cwd": "${workspaceFolder}" },
       "isBackground": true,
       "group": "test",
       "presentation": { "reveal": "always", "panel": "dedicated" },
@@ -123,8 +123,8 @@
     {
       "label": "core: test (coverage)",
       "type": "shell",
-      "command": "npx vitest run --coverage",
-      "options": { "cwd": "${workspaceFolder}/packages/core" },
+      "command": "node_modules\\.bin\\vitest run --root packages/core --coverage",
+      "options": { "cwd": "${workspaceFolder}" },
       "group": "test",
       "presentation": { "reveal": "always", "panel": "shared" },
       "problemMatcher": []
@@ -135,7 +135,7 @@
       "label": "core: type-check",
       "type": "shell",
       "command": "npm run lint",
-      "options": { "cwd": "${workspaceFolder}/packages/core" },
+      "options": { "cwd": "${workspaceFolder}" },
       "group": "build",
       "presentation": { "reveal": "always", "panel": "shared" },
       "problemMatcher": ["$tsc"]
@@ -145,7 +145,7 @@
     {
       "label": "workspace: build all",
       "type": "shell",
-      "command": "npm run build --workspaces --if-present",
+      "command": "npm run build",
       "options": { "cwd": "${workspaceFolder}" },
       "group": "build",
       "presentation": { "reveal": "always", "panel": "shared" },
@@ -154,7 +154,7 @@
     {
       "label": "workspace: test all",
       "type": "shell",
-      "command": "npm run test --workspaces --if-present",
+      "command": "npm test",
       "options": { "cwd": "${workspaceFolder}" },
       "group": "test",
       "presentation": { "reveal": "always", "panel": "shared" },
