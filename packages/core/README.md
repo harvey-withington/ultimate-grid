@@ -7,8 +7,6 @@ The vanilla JavaScript engine powering Ultimate Data Grid. Zero runtime dependen
 ## Installation
 
 ```bash
-pnpm add @ultimate-grid/core
-# or
 npm install @ultimate-grid/core
 ```
 

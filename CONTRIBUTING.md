@@ -7,7 +7,7 @@ Thank you for your interest in contributing! This document covers how to get set
 ## Prerequisites
 
 - **Node.js** ≥ 18
-- **pnpm** ≥ 9 (`npm install -g pnpm`)
+- **npm** ≥ 10
 
 ---
 
@@ -16,7 +16,7 @@ Thank you for your interest in contributing! This document covers how to get set
 ```bash
 git clone https://github.com/harvey-withington/ultimate-grid.git
 cd ultimate-grid
-pnpm install
+npm install
 ```
 
 ---
@@ -36,7 +36,7 @@ packages/
       selection/    SelectionModel
       styles/       ugrid.css
       virtual-scroll/ FenwickTree + VirtualScrollEngine
-    demo/           Vite demo app
+    demo/           Vite dev server
     src/__tests__/  Integration tests (createGrid)
 ```
 
@@ -45,20 +45,23 @@ packages/
 ## Running Locally
 
 ```bash
-# Interactive demo (hot-reload)
-pnpm --filter @ultimate-grid/core run demo
+# Core Demo (Vanilla JS) - Hot Reload
+npm run dev
 
-# Run tests once
-pnpm --filter @ultimate-grid/core run test
+# AngularJS Demo
+npm run dev:angularjs
 
-# Run tests in watch mode
-pnpm --filter @ultimate-grid/core run test:watch
+# React Demo
+npm run dev:react
 
-# Type-check
-pnpm --filter @ultimate-grid/core run lint
+# Run tests (Core)
+npm test
 
-# Build
-pnpm --filter @ultimate-grid/core run build
+# Type-check (Core)
+npm run lint
+
+# Build (Core)
+npm run build
 ```
 
 ---
@@ -67,8 +70,8 @@ pnpm --filter @ultimate-grid/core run build
 
 1. Fork the repo and create a feature branch: `git checkout -b feat/my-feature`
 2. Make your changes — add tests for any new behaviour
-3. Ensure all tests pass: `pnpm test`
-4. Ensure no type errors: `pnpm lint`
+3. Ensure all tests pass: `npm test`
+4. Ensure no type errors: `npm run lint`
 5. Commit with a clear message, e.g. `feat(core): add column pinning`
 6. Open a pull request against `main`
 

@@ -26,11 +26,12 @@ Built on a vanilla JavaScript core with zero runtime dependencies, framework ada
 
 ```
 packages/
-  core/      @ultimate-grid/core   — Vanilla JS engine (TypeScript, zero deps)
-  react/     @ultimate-grid/react  — React adapter  (pending)
-  vue/       @ultimate-grid/vue    — Vue adapter     (pending)
-  svelte/    @ultimate-grid/svelte — Svelte adapter  (pending)
-  angular/   @ultimate-grid/angular— Angular adapter (pending)
+  core/      @ultimate-grid/core      — Vanilla JS engine (TypeScript, zero deps)
+  angularjs/ @ultimate-grid/angularjs — AngularJS (v1) adapter
+  react/     @ultimate-grid/react     — React adapter
+  vue/       @ultimate-grid/vue       — Vue adapter     (pending)
+  svelte/    @ultimate-grid/svelte    — Svelte adapter  (pending)
+  angular/   @ultimate-grid/angular   — Angular adapter (pending)
 ```
 
 ---
@@ -40,14 +41,8 @@ packages/
 ### Install
 
 ```bash
-# pnpm
-pnpm add @ultimate-grid/core
-
 # npm
 npm install @ultimate-grid/core
-
-# yarn
-yarn add @ultimate-grid/core
 ```
 
 ### Usage
@@ -82,30 +77,36 @@ api.setSortModel([{ colId: 'name', direction: 'asc', index: 0 }]);
 ### Prerequisites
 
 - Node.js ≥ 18
-- pnpm ≥ 9
+- npm ≥ 10
 
 ### Setup
 
 ```bash
 git clone https://github.com/harvey-withington/ultimate-grid.git
 cd ultimate-grid
-pnpm install
+npm install
 ```
 
 ### Commands
 
 ```bash
-# Run the interactive demo
-pnpm --filter @ultimate-grid/core run demo
+# Run the core demo (Vanilla JS)
+npm run dev
 
-# Run all tests
-pnpm test
+# Run the AngularJS demo
+npm run dev:angularjs
 
-# Build all packages
-pnpm build
+# Run the React demo
+npm run dev:react
 
-# Type-check
-pnpm lint
+# Run all tests (core)
+npm test
+
+# Build core package
+npm run build
+
+# Type-check core
+npm run lint
 ```
 
 ---

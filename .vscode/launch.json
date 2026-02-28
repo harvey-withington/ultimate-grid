@@ -6,8 +6,8 @@
       "request": "launch",
       "name": "Debug Core Tests",
       "cwd": "${workspaceFolder}/packages/core",
-      "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["run", "test", "--run"],
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["test"],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "skipFiles": ["<node_internals>/**"]
@@ -17,8 +17,8 @@
       "request": "launch",
       "name": "Debug Core Tests (Current File)",
       "cwd": "${workspaceFolder}/packages/core",
-      "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["run", "test", "${fileBasenameNoExtension}", "--run"],
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["test", "--", "${fileBasenameNoExtension}"],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "skipFiles": ["<node_internals>/**"]

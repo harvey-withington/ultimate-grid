@@ -129,7 +129,7 @@ $rootScope.$on('ugrid:selectionChanged', function(_, e) {
 ## Running the demo
 
 ```bash
-pnpm --filter @ultimate-grid/angularjs run demo
+npm run dev:angularjs
 ```
 
 Starts Vite dev server at http://localhost:5174.
