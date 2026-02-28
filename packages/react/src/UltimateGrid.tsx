@@ -17,6 +17,7 @@
 
 import { useRef, useEffect, type CSSProperties, type ReactElement } from 'react';
 import { createGrid } from '../../core/src/index.ts';
+import type { RenderPipelineOptions } from '../../core/src/render/RenderPipeline.ts';
 import type {
   ColumnDef,
   GridApi,
@@ -31,6 +32,7 @@ export interface UltimateGridProps<TData = unknown> {
   rowData?: TData[];
   selectionMode?: GridOptions<TData>['selectionMode'];
   rowHeight?: number;
+  cellRenderer?: RenderPipelineOptions['cellRenderer'];
   options?: Partial<GridOptions<TData>>;
   onGridReady?: (api: GridApi<TData>) => void;
   onRowDataChanged?:    (e: GridEventMap['rowDataChanged'])    => void;
@@ -55,6 +57,7 @@ export function UltimateGrid<TData = unknown>(
     rowData,
     selectionMode = 'multi',
     rowHeight,
+    cellRenderer,
     options,
     onGridReady,
     onRowDataChanged,
@@ -121,6 +124,7 @@ export function UltimateGrid<TData = unknown>(
       rowData:       rowData ?? [],
       selectionMode: selectionMode ?? options?.selectionMode ?? 'multi',
       rowHeight:     rowHeight    ?? options?.rowHeight,
+      cellRenderer,
     });
 
     apiRef.current = api;

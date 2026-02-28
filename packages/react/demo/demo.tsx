@@ -17,7 +17,7 @@ import '../src/UltimateGrid.tsx';
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { UltimateGrid } from '../src/UltimateGrid.tsx';
-import type { GridApi, ColumnDef, SortState, FilterState } from '../../core/src/types.ts';
+import type { GridApi, ColumnDef, SortState, FilterState, Column, RowNode } from '../../core/src/types.ts';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -63,6 +63,54 @@ function generateData(count: number): Employee[] {
     });
   }
   return rows;
+}
+
+// ─── Cell renderer ───────────────────────────────────────────────────────────
+
+function employeeCellRenderer(col: Column, _node: RowNode, value: unknown): HTMLElement | null {
+  const cell = document.createElement('div');
+
+  switch (col.colId) {
+    case 'id':
+      cell.className = 'ugrid-cell ugrid-cell--number';
+      cell.textContent = String(value);
+      return cell;
+
+    case 'salary':
+      cell.className = 'ugrid-cell ugrid-cell--number';
+      cell.textContent = `$${Number(value).toLocaleString()}`;
+      return cell;
+
+    case 'score': {
+      cell.className = 'ugrid-cell ugrid-cell--score';
+      const bar = document.createElement('span');
+      bar.className = 'ugrid-score-bar';
+      bar.style.setProperty('--score-pct', `${value}%`);
+      bar.title = `${value}/100`;
+      const label = document.createElement('span');
+      label.className = 'ugrid-score-label';
+      label.textContent = String(value);
+      cell.appendChild(bar);
+      cell.appendChild(label);
+      return cell;
+    }
+
+    case 'department': {
+      cell.className = 'ugrid-cell ugrid-cell--badge';
+      const badge = document.createElement('span');
+      badge.textContent = String(value);
+      cell.appendChild(badge);
+      return cell;
+    }
+
+    case 'active':
+      cell.className = 'ugrid-cell';
+      cell.textContent = value ? '\u2611' : '\u2BBD';
+      return cell;
+
+    default:
+      return null;
+  }
 }
 
 // ─── Column definitions ───────────────────────────────────────────────────────
@@ -277,6 +325,7 @@ function App() {
           rowData={rowData}
           selectionMode="multi"
           rowHeight={36}
+          cellRenderer={employeeCellRenderer}
           onGridReady={handleGridReady}
           onSortChanged={handleSortChanged}
           onFilterChanged={handleFilterChanged}
