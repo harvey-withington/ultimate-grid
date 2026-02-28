@@ -200,8 +200,26 @@ export class RenderPipeline<TData = unknown> {
       input.addEventListener('input', () => {
         this._filterValues[col.colId] = input.value;
         this._applyFilters();
+        clearBtn.style.display = input.value ? 'flex' : 'none';
       });
-      cell.appendChild(input);
+
+      const clearBtn = document.createElement('button');
+      clearBtn.className = 'ugrid-filter-clear-btn';
+      clearBtn.textContent = '×';
+      clearBtn.title = 'Clear filter';
+      clearBtn.style.display = (this._filterValues[col.colId] ?? '') ? 'flex' : 'none';
+      clearBtn.addEventListener('click', () => {
+        input.value = '';
+        delete this._filterValues[col.colId];
+        this._applyFilters();
+        clearBtn.style.display = 'none';
+      });
+
+      const inputWrap = document.createElement('div');
+      inputWrap.className = 'ugrid-filter-input-wrap';
+      inputWrap.appendChild(input);
+      inputWrap.appendChild(clearBtn);
+      cell.appendChild(inputWrap);
       this._filterRow.appendChild(cell);
     }
   }
@@ -220,7 +238,9 @@ export class RenderPipeline<TData = unknown> {
   private _bindDragSelect(): void {
     // ── Mouse ────────────────────────────────────────────────────────────────
     this._body.addEventListener('mousedown', (e) => {
-      const rowEl = (e.target as HTMLElement).closest<HTMLElement>('.ugrid-row');
+      const target = e.target as HTMLElement;
+      if (target.closest('.ugrid-filter-icon-btn') || target.closest('.ugrid-filter-clear-btn')) return;
+      const rowEl = target.closest<HTMLElement>('.ugrid-row');
       if (!rowEl) return;
       this._mouseDownOnRow = true;
       const idx    = Number(rowEl.dataset.displayIndex);
@@ -412,24 +432,24 @@ export class RenderPipeline<TData = unknown> {
       : 'ugrid-filter-icon-btn';
     btn.title = isActive ? 'Clear filter' : `Filter by "${strVal}"`;
     btn.textContent = isActive ? '✕' : '▽';
+    btn.addEventListener('mousedown', (e) => { e.stopPropagation(); });
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
+      const filterCell = this._filterRow.querySelector<HTMLElement>(
+        `.ugrid-filter-cell[data-col-id="${col.colId}"]`
+      );
+      const input   = filterCell?.querySelector<HTMLInputElement>('input') ?? null;
+      const clearBtn = filterCell?.querySelector<HTMLButtonElement>('.ugrid-filter-clear-btn') ?? null;
       if (isActive) {
         delete this._filterValues[col.colId];
         this._applyFilters();
-        // Also clear the filter row input for this column
-        const input = this._filterRow.querySelector<HTMLInputElement>(
-          `.ugrid-filter-cell[data-col-id="${col.colId}"] input`
-        );
-        if (input) input.value = '';
+        if (input)    input.value = '';
+        if (clearBtn) clearBtn.style.display = 'none';
       } else {
         this._filterValues[col.colId] = exactExpr;
         this._applyFilters();
-        // Sync the filter row input for this column
-        const input = this._filterRow.querySelector<HTMLInputElement>(
-          `.ugrid-filter-cell[data-col-id="${col.colId}"] input`
-        );
-        if (input) input.value = exactExpr;
+        if (input)    input.value = exactExpr;
+        if (clearBtn) clearBtn.style.display = 'flex';
       }
     });
     cell.appendChild(btn);

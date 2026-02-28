@@ -248,27 +248,49 @@ body.demo-light {
   flex-shrink: 0;
   display: flex;
   align-items: center;
+  position: relative;
 }
 .ugrid-filter-cell:last-child { border-right: none; }
 
-.ugrid-filter-cell input {
+.ugrid-filter-input-wrap {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+.ugrid-filter-input-wrap::after {
+  content: '';
+  position: absolute;
+  right: 1px;
+  top: 1px;
+  bottom: 1px;
+  width: 24px;
+  border-radius: 0 3px 3px 0;
+  background: linear-gradient(to right, transparent, var(--ugrid-bg-filter-input) 75%);
+  pointer-events: none;
+  transition: opacity 0.1s;
+}
+.ugrid-filter-input-wrap:focus-within::after {
+  opacity: 0;
+}
+.ugrid-filter-input-wrap input {
   width: 100%;
   border: 1px solid var(--ugrid-border-inner);
   border-radius: 4px;
-  padding: 3px 7px;
+  padding: 3px 7px 3px 7px;
   font-size: 12px;
   font-family: var(--ugrid-font);
   outline: none;
   background: var(--ugrid-bg-filter-input);
   color: var(--ugrid-text-filter);
 }
-.ugrid-filter-cell input:focus {
+.ugrid-filter-input-wrap input:focus {
   border-color: var(--ugrid-focus-border);
   background: var(--ugrid-bg-filter-focus);
   box-shadow: 0 0 0 2px var(--ugrid-focus-ring);
 }
 /* Expression hint — invalid expression turns border red */
-.ugrid-filter-cell input.ugrid-filter--error {
+.ugrid-filter-input-wrap input.ugrid-filter--error {
   border-color: #ef4444;
   box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15);
 }
@@ -358,6 +380,32 @@ body.demo-light {
   color: #3b82f6;
 }
 .ugrid-filter-icon-btn--active:hover {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+/* ── Filter row clear button (× inside filter input cells) ─────────────── */
+.ugrid-filter-clear-btn {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: none;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--ugrid-text-muted, #94a3b8);
+  font-size: 13px;
+  line-height: 0;
+  cursor: pointer;
+  padding: 0;
+  z-index: 1;
+}
+.ugrid-filter-clear-btn:hover {
   background: #fee2e2;
   color: #ef4444;
 }
