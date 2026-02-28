@@ -68,15 +68,70 @@
     .demo-stats {
       background: #fff;
       border-bottom: 1px solid #e2e5ea;
-      padding: 6px 20px;
+      padding: 5px 20px;
       display: flex;
-      gap: 24px;
+      align-items: center;
+      gap: 20px;
       font-size: 12px;
       color: #666;
       flex-shrink: 0;
       transition: background 0.2s, border-color 0.2s;
+      flex-wrap: wrap;
     }
     .demo-stats strong { color: #1a1a2e; }
+    body.demo-dark .demo-stats strong { color: #f9fafb; }
+    @media (prefers-color-scheme: dark) {
+      body:not(.demo-light) .demo-stats strong { color: #f9fafb; }
+    }
+    .stat-item { display: flex; align-items: center; gap: 5px; white-space: nowrap; }
+    .stat-clear {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      border: none;
+      background: #cbd5e1;
+      color: #475569;
+      font-size: 9px;
+      line-height: 1;
+      cursor: pointer;
+      padding: 0;
+      flex-shrink: 0;
+      transition: background 0.15s, color 0.15s;
+    }
+    .stat-clear:hover { background: #ef4444; color: #fff; }
+    body.demo-dark .stat-clear { background: #374151; color: #9ca3af; }
+    body.demo-dark .stat-clear:hover { background: #ef4444; color: #fff; }
+    @media (prefers-color-scheme: dark) {
+      body:not(.demo-light) .stat-clear { background: #374151; color: #9ca3af; }
+      body:not(.demo-light) .stat-clear:hover { background: #ef4444; color: #fff; }
+    }
+    .stat-filter-summary { display: flex; align-items: center; gap: 5px; }
+    .stat-filter-summary .stat-filter-icon { opacity: 0.5; font-style: normal; }
+    #stat-filter-text:empty + .stat-clear { display: none; }
+    .stat-item--filter { display: none; }
+    .stat-item--filter.active { display: flex; }
+    .stat-actions { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+    .stat-actions button {
+      background: #e2e8f0;
+      border: 1px solid #cbd5e1;
+      color: #334155;
+      padding: 3px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+    .stat-actions button:hover { background: #cbd5e1; }
+    .stat-actions button:disabled { opacity: 0.4; cursor: default; }
+    body.demo-dark .stat-actions button { background: #1e293b; border-color: #374151; color: #94a3b8; }
+    body.demo-dark .stat-actions button:hover { background: #334155; color: #f1f5f9; }
+    @media (prefers-color-scheme: dark) {
+      body:not(.demo-light) .stat-actions button { background: #1e293b; border-color: #374151; color: #94a3b8; }
+      body:not(.demo-light) .stat-actions button:hover { background: #334155; color: #f1f5f9; }
+    }
 
     /* ── Grid wrapper ── */
     .demo-grid-wrap {
@@ -240,20 +295,30 @@
     <h1>⚡ Ultimate Data Grid</h1>
     <span>core engine demo</span>
     <div class="demo-controls">
-      <button id="btn-add">+ Add Row</button>
-      <button id="btn-remove">Remove Selected</button>
-      <button id="btn-clear-filters">Clear Filters</button>
-      <button id="btn-clear-sort">Clear Sort</button>
       <button id="btn-theme" title="Toggle dark / light mode">🌙</button>
       <button id="btn-help">? Help</button>
     </div>
   </div>
 
   <div class="demo-stats">
-    <span>Showing <strong id="stat-showing">0</strong> of <strong id="stat-total">0</strong> rows</span>
-    <span>Columns: <strong id="stat-cols">0</strong></span>
-    <span>Sort: <strong id="stat-sort">none</strong></span>
-    <span>Selected: <strong id="stat-selected">0</strong></span>
+    <span class="stat-item">Showing <strong id="stat-showing">0</strong> of <strong id="stat-total">0</strong> rows</span>
+    <span class="stat-item">Columns: <strong id="stat-cols">0</strong></span>
+    <span class="stat-item" id="stat-sort-item">
+      Sort: <strong id="stat-sort">none</strong>
+      <button class="stat-clear" id="btn-stat-clear-sort" title="Clear sort">✕</button>
+    </span>
+    <span class="stat-item" id="stat-selected-item">
+      Selected: <strong id="stat-selected">0</strong>
+      <button class="stat-clear" id="btn-stat-clear-selection" title="Clear selection">✕</button>
+    </span>
+    <span class="stat-item stat-item--filter" id="stat-filter-item">
+      <i class="stat-filter-icon">⊟</i><strong id="stat-filter-text"></strong>
+      <button class="stat-clear" id="btn-stat-clear-filters" title="Clear filters">✕</button>
+    </span>
+    <span class="stat-actions">
+      <button id="btn-add">+ Add Row</button>
+      <button id="btn-remove">Remove Selected</button>
+    </span>
   </div>
 
   <div class="demo-grid-wrap">

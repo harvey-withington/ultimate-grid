@@ -1,7 +1,7 @@
 import '../src/styles/ugrid.css';
 import { applyTheme, openHelp, closeHelp } from './theme';
 import { createGrid } from '../src/createGrid';
-import type { Column, ColumnDef, RowNode, SortState, GridApi } from '../src/types';
+import type { Column, ColumnDef, RowNode, SortState, FilterState, GridApi } from '../src/types';
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
@@ -120,6 +120,7 @@ container.style.height = '100%';
 
 let _totalRows = 0;
 let _sortState: SortState[] = [];
+let _filterState: FilterState = {};
 
 const api: GridApi<Employee> = createGrid<Employee>({
   container,
@@ -130,30 +131,60 @@ const api: GridApi<Employee> = createGrid<Employee>({
   cellRenderer: employeeCellRenderer,
 });
 
-// ─── Stats bar ────────────────────────────────────────────────────────────────
+// ─── Stats bar ───────────────────────────────────────────────────────────────────────────────
 
 _totalRows = 2000;
 const _statCols = COLUMN_DEFS.length;
 
+const HEADER_MAP: Record<string, string> = Object.fromEntries(
+  COLUMN_DEFS.map(c => [c.key, c.headerName ?? c.key])
+);
+
+function buildFilterSummary(filterState: FilterState): string {
+  return Object.entries(filterState)
+    .filter(([, v]) => v != null)
+    .map(([colId, v]) => {
+      const label = HEADER_MAP[colId] ?? colId;
+      const val = (v as any).value ?? (v as any).values?.join(', ') ?? '';
+      return `${label}: ${val}`;
+    })
+    .join(', ');
+}
+
 function updateStats(): void {
-  const selected = api.getSelectedRowIds();
-  const sort = _sortState.length
+  const selected  = api.getSelectedRowIds();
+  const showing   = api.getDisplayedRowCount();
+  const sort      = _sortState.length
     ? _sortState.map((s: SortState) => `${s.colId} ${s.direction}`).join(', ')
     : 'none';
-  document.getElementById('stat-showing')!.textContent  = String(_totalRows);
+  const filterSummary = buildFilterSummary(_filterState);
+  const hasFilter  = filterSummary.length > 0;
+  const hasSort    = _sortState.length > 0;
+  const hasSelected = selected.length > 0;
+
+  document.getElementById('stat-showing')!.textContent  = String(showing);
   document.getElementById('stat-total')!.textContent    = String(_totalRows);
   document.getElementById('stat-cols')!.textContent     = String(_statCols);
   document.getElementById('stat-sort')!.textContent     = sort;
   document.getElementById('stat-selected')!.textContent = String(selected.length);
+
+  document.getElementById('stat-filter-text')!.textContent = filterSummary;
+  document.getElementById('stat-filter-item')!.classList.toggle('active', hasFilter);
+
+  (document.getElementById('btn-stat-clear-sort') as HTMLButtonElement).style.display      = hasSort     ? '' : 'none';
+  (document.getElementById('btn-stat-clear-selection') as HTMLButtonElement).style.display = hasSelected ? '' : 'none';
+  if (btnRemove) btnRemove.disabled = !hasSelected;
 }
 
-api.on('rowDataChanged', () => updateStats());
-api.on('sortChanged',    (e) => { _sortState = e.sortState; updateStats(); });
-api.on('filterChanged',  () => updateStats());
+api.on('rowDataChanged',   () => updateStats());
+api.on('sortChanged',      (e) => { _sortState = e.sortState; updateStats(); });
+api.on('filterChanged',    (e) => { _filterState = e.filterState; updateStats(); });
 api.on('selectionChanged', () => updateStats());
 updateStats();
 
-// ─── Toolbar buttons ──────────────────────────────────────────────────────────
+// ─── Action buttons (stats bar) ─────────────────────────────────────────────
+
+const btnRemove = document.getElementById('btn-remove') as HTMLButtonElement;
 
 document.getElementById('btn-add')!.addEventListener('click', () => {
   const id = Date.now();
@@ -172,7 +203,7 @@ document.getElementById('btn-add')!.addEventListener('click', () => {
   updateStats();
 });
 
-document.getElementById('btn-remove')!.addEventListener('click', () => {
+btnRemove.addEventListener('click', () => {
   const ids = api.getSelectedRowIds();
   if (ids.length === 0) return;
   api.removeRows(ids);
@@ -181,8 +212,9 @@ document.getElementById('btn-remove')!.addEventListener('click', () => {
   updateStats();
 });
 
-document.getElementById('btn-clear-filters')!.addEventListener('click', () => api.setFilterModel({}));
-document.getElementById('btn-clear-sort')!.addEventListener('click',    () => api.setSortModel([]));
+document.getElementById('btn-stat-clear-sort')!.addEventListener('click',      () => api.setSortModel([]));
+document.getElementById('btn-stat-clear-filters')!.addEventListener('click',   () => api.setFilterModel({}));
+document.getElementById('btn-stat-clear-selection')!.addEventListener('click', () => { api.deselectAll(); updateStats(); });
 
 // ─── Theme toggle ─────────────────────────────────────────────────────────────
 

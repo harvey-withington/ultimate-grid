@@ -543,6 +543,7 @@ export interface GridApi<TData = unknown> {
   addRows(rows: TData[], index?: number): void;
   removeRows(rowIds: string[]): void;
   getRowNode(rowId: string): RowNode<TData> | null;
+  getDisplayedRowCount(): number;
   selectAll(): void;
   deselectAll(): void;
   getSelectedRowIds(): string[];

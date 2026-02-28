@@ -93,7 +93,13 @@ function ultimateGridDirective() {
 
         FORWARDED_EVENTS.forEach(function(evtName) {
           const off = gridApi.on(evtName, function(payload) {
-            scope.$root.$broadcast('ugrid:' + evtName, payload);
+            // $applyAsync schedules a digest on the next tick — safe to call
+            // from native JS callbacks without triggering "$apply in progress".
+            // This means consumers can update scope variables in $on handlers
+            // without needing their own $scope.$apply() / $applyAsync() calls.
+            scope.$root.$applyAsync(function() {
+              scope.$root.$broadcast('ugrid:' + evtName, payload);
+            });
           });
           unsubFns.push(off);
         });
@@ -164,8 +170,11 @@ if (angular) {
     // Remove the flag so normal page reloads work correctly.
     window.name = window.name.replace('NG_DEFER_BOOTSTRAP!', '').trim();
     // Let any user modules registered in the same micro-task finish first.
+    // Guard: resumeBootstrap only exists when AngularJS was actually paused.
     Promise.resolve().then(function() {
-      angular.resumeBootstrap();
+      if (typeof angular.resumeBootstrap === 'function') {
+        angular.resumeBootstrap();
+      }
     });
   }
 }

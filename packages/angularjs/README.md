@@ -107,7 +107,13 @@ angular.module('myApp').controller('MyCtrl', ['$scope', '$rootScope', function($
 
 ## Events (via `$rootScope.$broadcast`)
 
-All major grid events are forwarded as `ugrid:<eventName>`:
+All major grid events are forwarded as `ugrid:<eventName>`. The directive wraps every broadcast inside `$rootScope.$applyAsync()`, so **you do not need to call `$scope.$apply()` or `$applyAsync()` yourself** in your event handlers — Angular's digest cycle is triggered automatically:
+
+```js
+$rootScope.$on('ugrid:selectionChanged', function(_, e) {
+  vm.selectedCount = e.selectedRowIds.length; // just assign — digest is handled
+});
+```
 
 | Event                    | Payload                              |
 |--------------------------|--------------------------------------|

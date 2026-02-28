@@ -80,15 +80,157 @@
     .demo-stats {
       background: #fff;
       border-bottom: 1px solid #e2e5ea;
-      padding: 6px 20px;
+      padding: 5px 20px;
       display: flex;
-      gap: 24px;
+      align-items: center;
+      gap: 20px;
       font-size: 12px;
       color: #666;
       flex-shrink: 0;
       transition: background 0.2s, border-color 0.2s;
+      flex-wrap: wrap;
     }
     .demo-stats strong { color: #1a1a2e; }
+    body.demo-dark .demo-stats strong { color: #f9fafb; }
+    @media (prefers-color-scheme: dark) {
+      body:not(.demo-light) .demo-stats strong { color: #f9fafb; }
+    }
+    .stat-item { display: flex; align-items: center; gap: 5px; white-space: nowrap; }
+    .stat-clear {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      border: none;
+      background: #cbd5e1;
+      color: #475569;
+      font-size: 9px;
+      line-height: 1;
+      cursor: pointer;
+      padding: 0;
+      flex-shrink: 0;
+      transition: background 0.15s, color 0.15s;
+    }
+    .stat-clear:hover { background: #ef4444; color: #fff; }
+    body.demo-dark .stat-clear { background: #374151; color: #9ca3af; }
+    body.demo-dark .stat-clear:hover { background: #ef4444; color: #fff; }
+    @media (prefers-color-scheme: dark) {
+      body:not(.demo-light) .stat-clear { background: #374151; color: #9ca3af; }
+      body:not(.demo-light) .stat-clear:hover { background: #ef4444; color: #fff; }
+    }
+    .stat-filter-icon { font-style: normal; opacity: 0.5; }
+    .stat-actions { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+    .stat-actions button {
+      background: #e2e8f0;
+      border: 1px solid #cbd5e1;
+      color: #334155;
+      padding: 3px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+    .stat-actions button:hover { background: #cbd5e1; }
+    .stat-actions button:disabled { opacity: 0.4; cursor: default; }
+    .stat-actions button:disabled:hover { background: #e2e8f0; }
+    body.demo-dark .stat-actions button { background: #1e293b; border-color: #374151; color: #94a3b8; }
+    body.demo-dark .stat-actions button:hover { background: #334155; color: #f1f5f9; }
+    @media (prefers-color-scheme: dark) {
+      body:not(.demo-light) .stat-actions button { background: #1e293b; border-color: #374151; color: #94a3b8; }
+      body:not(.demo-light) .stat-actions button:hover { background: #334155; color: #f1f5f9; }
+    }
+
+    /* ── Help modal ───────────────────────────────────────────────────── */
+    .help-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .help-backdrop.open { display: flex; }
+    .help-modal {
+      background: #fff;
+      color: #1a1a2e;
+      border-radius: 10px;
+      max-width: 900px;
+      min-width: 600px;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+      overflow: hidden;
+    }
+    body.demo-dark .help-modal { background: #1e293b; color: #f1f5f9; }
+    @media (prefers-color-scheme: dark) {
+      body:not(.demo-light) .help-modal { background: #1e293b; color: #f1f5f9; }
+    }
+    .help-modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #e5e7eb;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    body.demo-dark .help-modal-header { border-bottom: 1px solid #0f172a; }
+    .help-modal-header h2 { font-size: 15px; font-weight: 700; }
+    .help-close {
+      background: none; border: none; font-size: 20px; cursor: pointer;
+      color: inherit; opacity: 0.5; line-height: 1; padding: 2px 6px; border-radius: 4px;
+    }
+    .help-close:hover { opacity: 1; background: rgba(0,0,0,0.06); }
+    .help-body {
+      padding: 20px; overflow-y: auto; display: flex; flex-direction: column;
+      gap: 22px; scrollbar-color: #cbd5e1 #f1f5f9;
+    }
+    .help-body::-webkit-scrollbar        { width: 14px; }
+    .help-body::-webkit-scrollbar-track  { background: #f1f5f9; border-radius: 4px; }
+    .help-body::-webkit-scrollbar-thumb  { background: #cbd5e1; border-radius: 4px; }
+    .help-body::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    body.demo-dark .help-body { scrollbar-color: #475569 #1e293b; }
+    body.demo-dark .help-body::-webkit-scrollbar-track { background: #1e293b; }
+    body.demo-dark .help-body::-webkit-scrollbar-thumb { background: #475569; }
+    body.demo-dark .help-body::-webkit-scrollbar-thumb:hover { background: #64748b; }
+    @media (prefers-color-scheme: dark) {
+      body:not(.demo-light) .help-body { scrollbar-color: #475569 #1e293b; }
+      body:not(.demo-light) .help-body::-webkit-scrollbar-track { background: #1e293b; }
+      body:not(.demo-light) .help-body::-webkit-scrollbar-thumb { background: #475569; }
+      body:not(.demo-light) .help-body::-webkit-scrollbar-thumb:hover { background: #64748b; }
+    }
+    .help-section h3 {
+      font-size: 12px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.06em; color: #2563eb; margin-bottom: 10px;
+    }
+    body.demo-dark .help-section h3 { color: #60a5fa; }
+    @media (prefers-color-scheme: dark) { body:not(.demo-light) .help-section h3 { color: #60a5fa; } }
+    .help-section p { font-size: 13px; line-height: 1.6; opacity: 0.85; margin-top: 8px; }
+    .help-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .help-table th {
+      text-align: left; padding: 5px 10px; background: #f1f5f9;
+      font-weight: 600; border-bottom: 1px solid #e2e8f0; color: #475569; white-space: nowrap;
+    }
+    body.demo-dark .help-table th { background: #0f172a; color: #94a3b8; border-color: #334155; }
+    .help-table td { padding: 5px 10px; border-bottom: 1px solid #f1f5f9; vertical-align: top; }
+    .help-table td:first-child { white-space: nowrap; }
+    body.demo-dark .help-table td { border-color: #1e293b; }
+    .help-table tr:last-child td { border-bottom: none; }
+    .help-table code {
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      background: #f1f5f9; padding: 1px 5px; border-radius: 3px; font-size: 11px; color: #0f172a;
+    }
+    body.demo-dark .help-table code { background: #0f172a; color: #e2e8f0; }
+    .help-kbd {
+      display: inline-block; background: #f1f5f9; border: 1px solid #cbd5e1;
+      border-radius: 4px; padding: 1px 7px; font-size: 11px; font-family: inherit;
+      font-weight: 600; color: #334155; box-shadow: 0 1px 0 #cbd5e1;
+    }
+    body.demo-dark .help-kbd { background: #1e293b; border-color: #475569; color: #cbd5e1; box-shadow: 0 1px 0 #475569; }
 
     /* ── Grid wrapper ────────────────────────────────────────────────────── */
     .demo-grid-wrap {
@@ -140,6 +282,7 @@
     .demo-code-panel .tok-punct  { color: #94a3b8; }
 
     #btn-code { font-family: 'JetBrains Mono', monospace; }
+    #btn-help  { font-weight: 700; }
   </style>
 </head>
 
@@ -152,21 +295,32 @@
     <span class="demo-badge">AngularJS 1.8</span>
 
     <div class="demo-controls">
-      <button ng-click="vm.addRow()">+ Add Row</button>
-      <button ng-click="vm.removeSelected()">Remove Selected</button>
-      <button ng-click="vm.clearFilters()">Clear Filters</button>
-      <button ng-click="vm.clearSort()">Clear Sort</button>
       <button class="btn-theme" ng-click="vm.toggleTheme()" title="{{vm.themeTitle}}">{{vm.themeIcon}}</button>
       <button id="btn-code" ng-click="vm.showCode = !vm.showCode">&lt;/&gt; Code</button>
+      <button id="btn-help" ng-click="vm.helpOpen = true">? Help</button>
     </div>
   </div>
 
   <!-- ── Stats bar ────────────────────────────────────────────────────────── -->
   <div class="demo-stats">
-    <span>Showing <strong>{{vm.stats.showing}}</strong> of <strong>{{vm.stats.total}}</strong> rows</span>
-    <span>Columns: <strong>{{vm.stats.cols}}</strong></span>
-    <span>Sort: <strong>{{vm.stats.sort}}</strong></span>
-    <span>Selected: <strong>{{vm.stats.selected}}</strong></span>
+    <span class="stat-item">Showing <strong>{{vm.stats.showing}}</strong> of <strong>{{vm.stats.total}}</strong> rows</span>
+    <span class="stat-item">Columns: <strong>{{vm.stats.cols}}</strong></span>
+    <span class="stat-item">
+      Sort: <strong>{{vm.stats.sort}}</strong>
+      <button class="stat-clear" ng-show="vm.stats.hasSort" ng-click="vm.clearSort()" title="Clear sort">✕</button>
+    </span>
+    <span class="stat-item">
+      Selected: <strong>{{vm.stats.selected}}</strong>
+      <button class="stat-clear" ng-show="vm.stats.selected > 0" ng-click="vm.clearSelection()" title="Clear selection">✕</button>
+    </span>
+    <span class="stat-item" ng-show="vm.stats.filterText">
+      <i class="stat-filter-icon">⊟</i><strong>{{vm.stats.filterText}}</strong>
+      <button class="stat-clear" ng-click="vm.clearFilters()" title="Clear filters">✕</button>
+    </span>
+    <span class="stat-actions">
+      <button ng-click="vm.addRow()">+ Add Row</button>
+      <button ng-click="vm.removeSelected()" ng-disabled="vm.stats.selected === 0">Remove Selected</button>
+    </span>
   </div>
 
   <!-- ── Code snippet panel ────────────────────────────────────────────────── -->
@@ -206,6 +360,90 @@
       on-grid-ready="vm.onGridReady(api)"
       api="vm.gridApi">
     </ultimate-grid>
+  </div>
+
+  <!-- ── Help modal ───────────────────────────────────────────────────────────── -->
+  <div class="help-backdrop" ng-class="{open: vm.helpOpen}" ng-click="vm.helpOpen = ($event.target !== $event.currentTarget) || false">
+    <div class="help-modal" role="dialog" aria-modal="true">
+      <div class="help-modal-header">
+        <h2>⚡ Ultimate Data Grid — Quick Reference</h2>
+        <button class="help-close" ng-click="vm.helpOpen = false" aria-label="Close">✕</button>
+      </div>
+      <div class="help-body">
+
+        <div class="help-section">
+          <h3>Row Selection</h3>
+          <table class="help-table">
+            <thead><tr><th>Action</th><th>Result</th></tr></thead>
+            <tbody>
+              <tr><td><span class="help-kbd">Click</span> a row</td><td>Select that row (deselects all others). Click again to deselect.</td></tr>
+              <tr><td><span class="help-kbd">Ctrl</span> + <span class="help-kbd">Click</span></td><td>Toggle that row on/off without affecting other selected rows.</td></tr>
+              <tr><td><span class="help-kbd">Click</span> + drag</td><td>Drag-select a contiguous range of rows.</td></tr>
+              <tr><td><span class="help-kbd">Ctrl</span> + drag on <em>unselected</em> row</td><td>Add dragged range to existing selection.</td></tr>
+              <tr><td><span class="help-kbd">Ctrl</span> + drag on <em>selected</em> row</td><td>Remove dragged range from existing selection.</td></tr>
+              <tr><td>Two-finger touch drag</td><td>Drag-select on mobile / trackpad.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="help-section">
+          <h3>Sorting</h3>
+          <table class="help-table">
+            <thead><tr><th>Action</th><th>Result</th></tr></thead>
+            <tbody>
+              <tr><td><span class="help-kbd">Click</span> column header</td><td>Sort ascending (▲). Click again for descending (▼). Third click removes sort.</td></tr>
+              <tr><td><span class="help-kbd">Ctrl</span> + <span class="help-kbd">Click</span> header</td><td>Add as a <strong>secondary sort</strong> (multi-sort).</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="help-section">
+          <h3>Filter Expressions</h3>
+          <p>Type directly into any filter input below the column header.</p>
+          <table class="help-table">
+            <thead><tr><th>Expression</th><th>Type</th><th>Meaning</th></tr></thead>
+            <tbody>
+              <tr><td><code>alice</code></td><td>Text</td><td>Contains "alice" (case-insensitive)</td></tr>
+              <tr><td><code>=Engineering</code></td><td>Text</td><td>Exactly equals "Engineering"</td></tr>
+              <tr><td><code>!=Sales</code></td><td>Text</td><td>Does not equal "Sales"</td></tr>
+              <tr><td><code>^A</code></td><td>Text</td><td>Starts with "A"</td></tr>
+              <tr><td><code>on$</code></td><td>Text</td><td>Ends with "on"</td></tr>
+              <tr><td><code>&gt;80000</code></td><td>Number</td><td>Greater than 80 000</td></tr>
+              <tr><td><code>50000..80000</code></td><td>Number</td><td>Between 50 000 and 80 000</td></tr>
+              <tr><td><code>2020..2023</code></td><td>Date</td><td>Joined between 2020 and 2023</td></tr>
+              <tr><td><code>&gt;2022-01-01</code></td><td>Date</td><td>Joined after Jan 1 2022</td></tr>
+            </tbody>
+          </table>
+          <p>Multiple column filters are combined with AND. Active filters appear in the stats bar.</p>
+        </div>
+
+        <div class="help-section">
+          <h3>Toolbar</h3>
+          <table class="help-table">
+            <thead><tr><th>Button</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr><td><strong>+ Add Row</strong></td><td>Appends a new randomly-generated employee row.</td></tr>
+              <tr><td><strong>Remove Selected</strong></td><td>Permanently removes all currently-selected rows.</td></tr>
+              <tr><td><strong>Clear Filters</strong></td><td>Resets all column filter inputs.</td></tr>
+              <tr><td><strong>Clear Sort</strong></td><td>Removes all active sort columns.</td></tr>
+              <tr><td><strong>🌙 / ☀️</strong></td><td>Toggle dark / light mode.</td></tr>
+              <tr><td><strong>&lt;/&gt; Code</strong></td><td>Show/hide usage code snippet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="help-section">
+          <h3>Keyboard</h3>
+          <table class="help-table">
+            <thead><tr><th>Key</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr><td><span class="help-kbd">Esc</span></td><td>Close this help panel.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
   </div>
 
   <script type="module" src="./demo.js"></script>

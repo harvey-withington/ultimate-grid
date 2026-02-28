@@ -93,7 +93,27 @@ function employeeCellRenderer(col, node, value) {
   }
 }
 
-// ─── AngularJS app ────────────────────────────────────────────────────────────
+// ─── AngularJS app ─────────────────────────────────────────────────────────────────────────────────
+
+const COLUMN_HEADER_MAP = {
+  id: '#', name: 'Name', department: 'Department', role: 'Role',
+  location: 'Location', salary: 'Salary', score: 'Score',
+  joined: 'Joined', active: 'Active',
+};
+
+function buildFilterSummary(filterState) {
+  return Object.entries(filterState)
+    .filter(function(_ref) { return _ref[1] != null; })
+    .map(function(_ref) {
+      var colId = _ref[0], v = _ref[1];
+      var label = COLUMN_HEADER_MAP[colId] || colId;
+      var val = (v && v.value != null) ? v.value
+              : (v && v.values)        ? v.values.join(', ')
+              : '';
+      return label + ': ' + val;
+    })
+    .join(', ');
+}
 
 angular.module('ugridDemo', ['ultimateGrid'])
 
@@ -123,21 +143,32 @@ angular.module('ugridDemo', ['ultimateGrid'])
     cellRenderer: employeeCellRenderer,
   };
 
-  // ── Stats ─────────────────────────────────────────────────────────────────
+  // ── Stats ───────────────────────────────────────────────────────────────
   vm.stats = {
-    total:    vm.rowData.length,
-    showing:  vm.rowData.length,
-    cols:     vm.columnDefs.length,
-    sort:     'none',
-    selected: 0,
+    total:      vm.rowData.length,
+    showing:    vm.rowData.length,
+    cols:       vm.columnDefs.length,
+    sort:       'none',
+    hasSort:    false,
+    selected:   0,
+    filterText: '',
   };
+
+  // ── Help modal ───────────────────────────────────────────────────────────────
+  vm.helpOpen = false;
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && vm.helpOpen) {
+      $scope.$apply(function() { vm.helpOpen = false; });
+    }
+  });
 
   // ── GridApi handle (filled by directive via api="vm.gridApi") ─────────────
   vm.gridApi = null;
 
   vm.onGridReady = function(api) {
     vm.gridApi = api;
-    vm.stats.showing = vm.rowData.length;
+    vm.stats.showing = api.getDisplayedRowCount();
   };
 
   // ── Listen to forwarded grid events ───────────────────────────────────────
@@ -146,22 +177,20 @@ angular.module('ugridDemo', ['ultimateGrid'])
   });
 
   $rootScope.$on('ugrid:sortChanged', function(_, e) {
-    vm.stats.sort = e.sortState.length
+    vm.stats.hasSort = e.sortState.length > 0;
+    vm.stats.sort    = vm.stats.hasSort
       ? e.sortState.map(function(s) { return s.colId + ' ' + s.direction; }).join(', ')
       : 'none';
   });
 
-  $rootScope.$on('ugrid:filterChanged', function() {
-    if (vm.gridApi) {
-      // Approximate showing count from the grid's row model display count
-      // (not directly on GridApi, so we use rowData length as fallback)
-      vm.stats.showing = vm.rowData.length;
-    }
+  $rootScope.$on('ugrid:filterChanged', function(_, e) {
+    vm.stats.showing     = vm.gridApi ? vm.gridApi.getDisplayedRowCount() : vm.rowData.length;
+    vm.stats.filterText  = buildFilterSummary(e.filterState || {});
   });
 
   $rootScope.$on('ugrid:rowDataChanged', function() {
-    vm.stats.showing = vm.rowData.length;
     vm.stats.total   = vm.rowData.length;
+    vm.stats.showing = vm.gridApi ? vm.gridApi.getDisplayedRowCount() : vm.rowData.length;
   });
 
   // ── Toolbar actions ───────────────────────────────────────────────────────
@@ -204,7 +233,11 @@ angular.module('ugridDemo', ['ultimateGrid'])
 
   vm.clearSort = function() {
     if (vm.gridApi) vm.gridApi.setSortModel([]);
-    vm.stats.sort = 'none';
+  };
+
+  vm.clearSelection = function() {
+    if (vm.gridApi) vm.gridApi.deselectAll();
+    vm.stats.selected = 0;
   };
 
   // ── Theme ─────────────────────────────────────────────────────────────────

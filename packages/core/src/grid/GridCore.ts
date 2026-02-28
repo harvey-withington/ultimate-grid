@@ -146,6 +146,9 @@ export class GridCore<TData = unknown> {
       getRowNode(rowId: string): RowNode<TData> | null {
         return self._rowModel.getRowById(rowId);
       },
+      getDisplayedRowCount(): number {
+        return self._rowModel.displayRowCount;
+      },
 
       // ── Selection (stubs — SelectionPlugin will override) ──
       selectAll() { self._bus.emit('selectionChanged', { type: 'selectionChanged', source: 'api', selectedRowIds: [] }); },
