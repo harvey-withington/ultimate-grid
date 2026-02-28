@@ -28,4 +28,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Demo** — Vite dev server with live data, dark/light toggle, help modal, filter/sort/selection controls
 - **314 passing tests** across 10 test files
 
-[0.1.0]: https://github.com/your-org/ultimate-grid/releases/tag/v0.1.0
+[0.1.0]: https://github.com/harvey-withington/ultimate-grid/releases/tag/v0.1.0

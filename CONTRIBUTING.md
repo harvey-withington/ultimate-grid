@@ -14,7 +14,7 @@ Thank you for your interest in contributing! This document covers how to get set
 ## Setup
 
 ```bash
-git clone https://github.com/your-org/ultimate-grid.git
+git clone https://github.com/harvey-withington/ultimate-grid.git
 cd ultimate-grid
 pnpm install
 ```

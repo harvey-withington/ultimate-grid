@@ -4,7 +4,7 @@ A fully open-source, MIT-licensed, high-performance data grid with **no enterpri
 
 Built on a vanilla JavaScript core with zero runtime dependencies, framework adapters for React, Vue, Svelte, and Angular are provided as thin wrappers around the same engine.
 
-[![CI](https://github.com/your-org/ultimate-grid/actions/workflows/ci.yml/badge.svg)](https://github.com/your-org/ultimate-grid/actions/workflows/ci.yml)
+[![CI](https://github.com/harvey-withington/ultimate-grid/actions/workflows/ci.yml/badge.svg)](https://github.com/harvey-withington/ultimate-grid/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ---
@@ -87,7 +87,7 @@ api.setSortModel([{ colId: 'name', direction: 'asc', index: 0 }]);
 ### Setup
 
 ```bash
-git clone https://github.com/your-org/ultimate-grid.git
+git clone https://github.com/harvey-withington/ultimate-grid.git
 cd ultimate-grid
 pnpm install
 ```
