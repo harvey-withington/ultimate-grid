@@ -85,7 +85,7 @@ function employeeCellRenderer(col, node, value) {
     }
 
     case 'active':
-      cell.className = 'ugrid-cell';
+      cell.className = 'ugrid-cell ugrid-cell--checkbox' + (value ? ' ugrid-cell--checked' : ' ugrid-cell--unchecked');
       cell.textContent = value ? '☑' : '⮽';
       return cell;
 

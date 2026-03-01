@@ -11,7 +11,7 @@
     .ugrid-score-bar {
       display: inline-block;
       width: 60px; height: 6px;
-      background: #e2e8f0;
+      background: var(--ugrid-score-bg);
       border-radius: 3px;
       position: relative;
       flex-shrink: 0;
@@ -21,12 +21,12 @@
       position: absolute;
       inset: 0;
       width: var(--score-pct, 0%);
-      background: #3b82f6;
+      background: var(--ugrid-score-fill);
       border-radius: 3px;
     }
-    .ugrid-score-label { font-size: 11px; color: #64748b; }
+    .ugrid-score-label { font-size: 11px; color: var(--ugrid-text-muted); }
     .ugrid-cell--badge span {
-      background: #ede9fe; color: #6d28d9;
+      background: var(--ugrid-badge-bg); color: var(--ugrid-badge-text);
       padding: 1px 7px; border-radius: 10px; font-size: 11px;
     }
     .ugrid-cell--number { justify-content: flex-end; font-variant-numeric: tabular-nums; }

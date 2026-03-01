@@ -4,194 +4,175 @@
    Import this once at your app root or bundle entry point.
    ============================================================ */
 
-/* ── CSS custom properties (light mode defaults) ─────────────────────────── */
+/* ── CSS custom properties ─────────────────────────────────────────────────── */
 :root {
   --ugrid-font: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --ugrid-font-size: 13px;
   --ugrid-row-height: 36px;
-
-  /* Borders & radius */
-  --ugrid-border-color: #d0d5dd;
-  --ugrid-border-inner: #e5e7eb;
-  --ugrid-border-row: #f0f2f5;
   --ugrid-radius: 8px;
 
-  /* Backgrounds */
-  --ugrid-bg: #ffffff;
-  --ugrid-bg-header: #f8f9fb;
-  --ugrid-bg-row-even: #fafbfc;
-  --ugrid-bg-row-hover: #f5f7ff;
-  --ugrid-bg-row-selected: #dbeafe;
-  --ugrid-bg-filter: #ffffff;
-  --ugrid-bg-filter-input: #fafafa;
-  --ugrid-bg-filter-focus: #ffffff;
-  --ugrid-bg-header-hover: #eef0f4;
-  --ugrid-bg-header-sorted: #eef4ff;
+  /* --- Light Palette --- */
+  --ugrid-lt-border: #d0d5dd;
+  --ugrid-lt-border-inner: #e5e7eb;
+  --ugrid-lt-border-row: #c6c6c6;
+  --ugrid-lt-bg: #ffffff;
+  --ugrid-lt-bg-header: #f8f9fb;
+  --ugrid-lt-bg-row-even: #fafbfc;
+  --ugrid-lt-bg-row-hover: #eaf8ff;
+  --ugrid-lt-bg-row-selected: #c2ecff;
+  --ugrid-lt-bg-filter: #ffffff;
+  --ugrid-lt-bg-filter-input: #fafafa;
+  --ugrid-lt-bg-filter-focus: #ffffff;
+  --ugrid-lt-bg-header-hover: #d3f1ff;
+  --ugrid-lt-bg-header-sorted: #c2ecff;
+  --ugrid-lt-text: #111827;
+  --ugrid-lt-text-header: #374151;
+  --ugrid-lt-text-header-sorted: #222222;
+  --ugrid-lt-text-muted: #9ca3af;
+  --ugrid-lt-text-filter: #111827;
+  --ugrid-lt-focus-ring: rgba(59, 130, 246, 0.15);
+  --ugrid-lt-focus-border: #3b82f6;
+  --ugrid-lt-badge-bg: #ececec;
+  --ugrid-lt-badge-text: #40434b;
+  --ugrid-lt-score-bg: #e5e7eb;
+  --ugrid-lt-score-fill: #10b981;
+  --ugrid-lt-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  --ugrid-lt-scrollbar-track: #f1f5f9;
+  --ugrid-lt-scrollbar-thumb: #cbd5e1;
+  --ugrid-lt-scrollbar-thumb-hover: #94a3b8;
 
-  /* Text */
-  --ugrid-text: #111827;
-  --ugrid-text-header: #374151;
-  --ugrid-text-header-sorted: #2563eb;
-  --ugrid-text-muted: #9ca3af;
-  --ugrid-text-filter: #111827;
+  /* --- Dark Palette (Edit these to change dark mode globally) --- */
+  --ugrid-dk-border: #232323;
+  --ugrid-dk-border-inner: #333333;
+  --ugrid-dk-border-row: #333333;
+  --ugrid-dk-bg: #1a1a1a;
+  --ugrid-dk-bg-header: #111111;
+  --ugrid-dk-bg-row-even: #1f1f1f;
+  --ugrid-dk-bg-row-hover: #111827;
+  --ugrid-dk-bg-row-selected: #091422;
+  --ugrid-dk-bg-filter: #1a1a1a;
+  --ugrid-dk-bg-filter-input: #111111;
+  --ugrid-dk-bg-filter-focus: #000000;
+  --ugrid-dk-bg-header-hover: #222222;
+  --ugrid-dk-bg-header-sorted: #2d2d2d;
+  --ugrid-dk-text: #e0e0e0;
+  --ugrid-dk-text-header: #a0a0a0;
+  --ugrid-dk-text-header-sorted: #60a5fa;
+  --ugrid-dk-text-muted: #666666;
+  --ugrid-dk-text-filter: #e0e0e0;
+  --ugrid-dk-focus-ring: rgba(96, 165, 250, 0.2);
+  --ugrid-dk-focus-border: #60a5fa;
+  --ugrid-dk-badge-bg: #2d2d2d;
+  --ugrid-dk-badge-text: #b5bec8;
+  --ugrid-dk-score-bg: #333333;
+  --ugrid-dk-score-fill: #34d399;
+  --ugrid-dk-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
+  --ugrid-dk-scrollbar-track: #111111;
+  --ugrid-dk-scrollbar-thumb: #444444;
+  --ugrid-dk-scrollbar-thumb-hover: #555555;
 
-  /* Focus ring */
-  --ugrid-focus-ring: rgba(59, 130, 246, 0.15);
-  --ugrid-focus-border: #3b82f6;
-
-  /* Badge (department) */
-  --ugrid-badge-bg: #dbeafe;
-  --ugrid-badge-text: #1d4ed8;
-
-  /* Score bar */
-  --ugrid-score-bg: #e5e7eb;
-  --ugrid-score-fill: #10b981;
-
-  /* Shadow */
-  --ugrid-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-
-  /* Scrollbar */
-  --ugrid-scrollbar-track: #f1f5f9;
-  --ugrid-scrollbar-thumb: #cbd5e1;
-  --ugrid-scrollbar-thumb-hover: #94a3b8;
+  /* --- Active theme mappings (Default to Light) --- */
+  --ugrid-border-color: var(--ugrid-lt-border);
+  --ugrid-border-inner: var(--ugrid-lt-border-inner);
+  --ugrid-border-row: var(--ugrid-lt-border-row);
+  --ugrid-bg: var(--ugrid-lt-bg);
+  --ugrid-bg-header: var(--ugrid-lt-bg-header);
+  --ugrid-bg-row-even: var(--ugrid-lt-bg-row-even);
+  --ugrid-bg-row-hover: var(--ugrid-lt-bg-row-hover);
+  --ugrid-bg-row-selected: var(--ugrid-lt-bg-row-selected);
+  --ugrid-bg-filter: var(--ugrid-lt-bg-filter);
+  --ugrid-bg-filter-input: var(--ugrid-lt-bg-filter-input);
+  --ugrid-bg-filter-focus: var(--ugrid-lt-bg-filter-focus);
+  --ugrid-bg-header-hover: var(--ugrid-lt-bg-header-hover);
+  --ugrid-bg-header-sorted: var(--ugrid-lt-bg-header-sorted);
+  --ugrid-text: var(--ugrid-lt-text);
+  --ugrid-text-header: var(--ugrid-lt-text-header);
+  --ugrid-text-header-sorted: var(--ugrid-lt-text-header-sorted);
+  --ugrid-text-muted: var(--ugrid-lt-text-muted);
+  --ugrid-text-filter: var(--ugrid-lt-text-filter);
+  --ugrid-focus-ring: var(--ugrid-lt-focus-ring);
+  --ugrid-focus-border: var(--ugrid-lt-focus-border);
+  --ugrid-badge-bg: var(--ugrid-lt-badge-bg);
+  --ugrid-badge-text: var(--ugrid-lt-badge-text);
+  --ugrid-badge-selected-bg: hsl(from var(--ugrid-badge-bg) h s calc(l + 10));
+  --ugrid-badge-selected-text: hsl(from var(--ugrid-badge-text) h s calc(l + 10));
+  --ugrid-score-bg: var(--ugrid-lt-score-bg);
+  --ugrid-score-fill: var(--ugrid-lt-score-fill);
+  --ugrid-shadow: var(--ugrid-lt-shadow);
+  --ugrid-scrollbar-track: var(--ugrid-lt-scrollbar-track);
+  --ugrid-scrollbar-thumb: var(--ugrid-lt-scrollbar-thumb);
+  --ugrid-scrollbar-thumb-hover: var(--ugrid-lt-scrollbar-thumb-hover);
 }
 
-/* OS-level dark preference (only when not manually overridden to light) */
+/* --- Switch to Dark Theme variables --- */
+/* OS-level dark preference OR manual dark toggle */
 @media (prefers-color-scheme: dark) {
   body:not(.demo-light) {
-    --ugrid-border-color: #374151;
-    --ugrid-border-inner: #2d3748;
-    --ugrid-border-row: #1f2937;
-    --ugrid-bg: #1f2937;
-    --ugrid-bg-header: #111827;
-    --ugrid-bg-row-even: #1a2332;
-    --ugrid-bg-row-hover: #253347;
-    --ugrid-bg-row-selected: #1e3a5f;
-    --ugrid-bg-filter: #1f2937;
-    --ugrid-bg-filter-input: #111827;
-    --ugrid-bg-filter-focus: #1f2937;
-    --ugrid-bg-header-hover: #1e293b;
-    --ugrid-bg-header-sorted: #1e3a5f;
-    --ugrid-text: #f9fafb;
-    --ugrid-text-header: #d1d5db;
-    --ugrid-text-header-sorted: #60a5fa;
-    --ugrid-text-muted: #6b7280;
-    --ugrid-text-filter: #f9fafb;
-    --ugrid-focus-ring: rgba(96, 165, 250, 0.2);
-    --ugrid-focus-border: #60a5fa;
-    --ugrid-badge-bg: #1e3a5f;
-    --ugrid-badge-text: #93c5fd;
-    --ugrid-score-bg: #374151;
-    --ugrid-score-fill: #34d399;
-    --ugrid-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
-    --ugrid-scrollbar-track: #1e293b;
-    --ugrid-scrollbar-thumb: #475569;
-    --ugrid-scrollbar-thumb-hover: #64748b;
+    --ugrid-border-color: var(--ugrid-dk-border);
+    --ugrid-border-inner: var(--ugrid-dk-border-inner);
+    --ugrid-border-row: var(--ugrid-dk-border-row);
+    --ugrid-bg: var(--ugrid-dk-bg);
+    --ugrid-bg-header: var(--ugrid-dk-bg-header);
+    --ugrid-bg-row-even: var(--ugrid-dk-bg-row-even);
+    --ugrid-bg-row-hover: var(--ugrid-dk-bg-row-hover);
+    --ugrid-bg-row-selected: var(--ugrid-dk-bg-row-selected);
+    --ugrid-bg-filter: var(--ugrid-dk-bg-filter);
+    --ugrid-bg-filter-input: var(--ugrid-dk-bg-filter-input);
+    --ugrid-bg-filter-focus: var(--ugrid-dk-bg-filter-focus);
+    --ugrid-bg-header-hover: var(--ugrid-dk-bg-header-hover);
+    --ugrid-bg-header-sorted: var(--ugrid-dk-bg-header-sorted);
+    --ugrid-text: var(--ugrid-dk-text);
+    --ugrid-text-header: var(--ugrid-dk-text-header);
+    --ugrid-text-header-sorted: var(--ugrid-dk-text-header-sorted);
+    --ugrid-text-muted: var(--ugrid-dk-text-muted);
+    --ugrid-text-filter: var(--ugrid-dk-text-filter);
+    --ugrid-focus-ring: var(--ugrid-dk-focus-ring);
+    --ugrid-focus-border: var(--ugrid-dk-focus-border);
+    --ugrid-badge-bg: var(--ugrid-dk-badge-bg);
+    --ugrid-badge-text: var(--ugrid-dk-badge-text);
+    --ugrid-badge-selected-bg: hsl(from var(--ugrid-badge-bg) h s calc(l + 10));
+    --ugrid-badge-selected-text: hsl(from var(--ugrid-badge-text) h s calc(l + 10));
+    --ugrid-score-bg: var(--ugrid-dk-score-bg);
+    --ugrid-score-fill: var(--ugrid-dk-score-fill);
+    --ugrid-shadow: var(--ugrid-dk-shadow);
+    --ugrid-scrollbar-track: var(--ugrid-dk-scrollbar-track);
+    --ugrid-scrollbar-thumb: var(--ugrid-dk-scrollbar-thumb);
+    --ugrid-scrollbar-thumb-hover: var(--ugrid-dk-scrollbar-thumb-hover);
   }
 }
 
-/* Manual dark toggle: body.demo-dark forces dark variables */
-body.demo-dark {
-  --ugrid-border-color: #374151;
-  --ugrid-border-inner: #2d3748;
-  --ugrid-border-row: #1f2937;
-  --ugrid-bg: #1f2937;
-  --ugrid-bg-header: #111827;
-  --ugrid-bg-row-even: #1a2332;
-  --ugrid-bg-row-hover: #253347;
-  --ugrid-bg-row-selected: #1e3a5f;
-  --ugrid-bg-filter: #1f2937;
-  --ugrid-bg-filter-input: #111827;
-  --ugrid-bg-filter-focus: #1f2937;
-  --ugrid-bg-header-hover: #1e293b;
-  --ugrid-bg-header-sorted: #1e3a5f;
-  --ugrid-text: #f9fafb;
-  --ugrid-text-header: #d1d5db;
-  --ugrid-text-header-sorted: #60a5fa;
-  --ugrid-text-muted: #6b7280;
-  --ugrid-text-filter: #f9fafb;
-  --ugrid-focus-ring: rgba(96, 165, 250, 0.2);
-  --ugrid-focus-border: #60a5fa;
-  --ugrid-badge-bg: #1e3a5f;
-  --ugrid-badge-text: #93c5fd;
-  --ugrid-badge-selected-bg: hsl(from var(--ugrid-badge-bg) h s calc(l + 10));
-  --ugrid-badge-selected-text: hsl(
-    from var(--ugrid-badge-text) h s calc(l + 10)
-  );
-  --ugrid-score-bg: #374151;
-  --ugrid-score-fill: #34d399;
-  --ugrid-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
-  --ugrid-scrollbar-track: #1e293b;
-  --ugrid-scrollbar-thumb: #475569;
-  --ugrid-scrollbar-thumb-hover: #64748b;
-}
-
-/* Manual light toggle: body.demo-light forces light variables (overrides OS dark) */
-body.demo-light {
-  --ugrid-border-color: #d0d5dd;
-  --ugrid-border-inner: #e5e7eb;
-  --ugrid-border-row: #f0f2f5;
-  --ugrid-bg: #ffffff;
-  --ugrid-bg-header: #f8f9fb;
-  --ugrid-bg-row-even: #fafbfc;
-  --ugrid-bg-row-hover: #f5f7ff;
-  --ugrid-bg-row-selected: #dbeafe;
-  --ugrid-bg-filter: #ffffff;
-  --ugrid-bg-filter-input: #fafafa;
-  --ugrid-bg-filter-focus: #ffffff;
-  --ugrid-bg-header-hover: #eef0f4;
-  --ugrid-bg-header-sorted: #eef4ff;
-  --ugrid-text: #111827;
-  --ugrid-text-header: #374151;
-  --ugrid-text-header-sorted: #2563eb;
-  --ugrid-text-muted: #9ca3af;
-  --ugrid-text-filter: #111827;
-  --ugrid-focus-ring: rgba(59, 130, 246, 0.15);
-  --ugrid-focus-border: #3b82f6;
-  --ugrid-badge-bg: #dbeafe;
-  --ugrid-badge-text: #1d4ed8;
-  --ugrid-badge-selected-bg: hsl(from var(--ugrid-badge-bg) h s calc(l + 5));
-  --ugrid-badge-selected-text: hsl(
-    from var(--ugrid-badge-text) h s calc(l + 5)
-  );
-  --ugrid-score-bg: #e5e7eb;
-  --ugrid-score-fill: #10b981;
-  --ugrid-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-  --ugrid-scrollbar-track: #f1f5f9;
-  --ugrid-scrollbar-thumb: #cbd5e1;
-  --ugrid-scrollbar-thumb-hover: #94a3b8;
-}
-
-/* Allow explicit .ugrid-theme-dark class to force dark mode regardless of OS */
+body.demo-dark,
 .ugrid-theme-dark {
-  --ugrid-border-color: #374151;
-  --ugrid-border-inner: #2d3748;
-  --ugrid-border-row: #1f2937;
-  --ugrid-bg: #1f2937;
-  --ugrid-bg-header: #111827;
-  --ugrid-bg-row-even: #1a2332;
-  --ugrid-bg-row-hover: #253347;
-  --ugrid-bg-row-selected: #1e3a5f;
-  --ugrid-bg-filter: #1f2937;
-  --ugrid-bg-filter-input: #111827;
-  --ugrid-bg-filter-focus: #1f2937;
-  --ugrid-bg-header-hover: #1e293b;
-  --ugrid-bg-header-sorted: #1e3a5f;
-  --ugrid-text: #f9fafb;
-  --ugrid-text-header: #d1d5db;
-  --ugrid-text-header-sorted: #60a5fa;
-  --ugrid-text-muted: #6b7280;
-  --ugrid-text-filter: #f9fafb;
-  --ugrid-focus-ring: rgba(96, 165, 250, 0.2);
-  --ugrid-focus-border: #60a5fa;
-  --ugrid-badge-bg: #1e3a5f;
-  --ugrid-badge-text: #93c5fd;
-  --ugrid-score-bg: #374151;
-  --ugrid-score-fill: #34d399;
-  --ugrid-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
-  --ugrid-scrollbar-track: #1e293b;
-  --ugrid-scrollbar-thumb: #475569;
-  --ugrid-scrollbar-thumb-hover: #64748b;
+  --ugrid-border-color: var(--ugrid-dk-border);
+  --ugrid-border-inner: var(--ugrid-dk-border-inner);
+  --ugrid-border-row: var(--ugrid-dk-border-row);
+  --ugrid-bg: var(--ugrid-dk-bg);
+  --ugrid-bg-header: var(--ugrid-dk-bg-header);
+  --ugrid-bg-row-even: var(--ugrid-dk-bg-row-even);
+  --ugrid-bg-row-hover: var(--ugrid-dk-bg-row-hover);
+  --ugrid-bg-row-selected: var(--ugrid-dk-bg-row-selected);
+  --ugrid-bg-filter: var(--ugrid-dk-bg-filter);
+  --ugrid-bg-filter-input: var(--ugrid-dk-bg-filter-input);
+  --ugrid-bg-filter-focus: var(--ugrid-dk-bg-filter-focus);
+  --ugrid-bg-header-hover: var(--ugrid-dk-bg-header-hover);
+  --ugrid-bg-header-sorted: var(--ugrid-dk-bg-header-sorted);
+  --ugrid-text: var(--ugrid-dk-text);
+  --ugrid-text-header: var(--ugrid-dk-text-header);
+  --ugrid-text-header-sorted: var(--ugrid-dk-text-header-sorted);
+  --ugrid-text-muted: var(--ugrid-dk-text-muted);
+  --ugrid-text-filter: var(--ugrid-dk-text-filter);
+  --ugrid-focus-ring: var(--ugrid-dk-focus-ring);
+  --ugrid-focus-border: var(--ugrid-dk-focus-border);
+  --ugrid-badge-bg: var(--ugrid-dk-badge-bg);
+  --ugrid-badge-text: var(--ugrid-dk-badge-text);
+  --ugrid-badge-selected-bg: hsl(from var(--ugrid-badge-bg) h s calc(l + 10));
+  --ugrid-badge-selected-text: hsl(from var(--ugrid-badge-text) h s calc(l + 10));
+  --ugrid-score-bg: var(--ugrid-dk-score-bg);
+  --ugrid-score-fill: var(--ugrid-dk-score-fill);
+  --ugrid-shadow: var(--ugrid-dk-shadow);
+  --ugrid-scrollbar-track: var(--ugrid-dk-scrollbar-track);
+  --ugrid-scrollbar-thumb: var(--ugrid-dk-scrollbar-thumb);
+  --ugrid-scrollbar-thumb-hover: var(--ugrid-dk-scrollbar-thumb-hover);
 }
 
 /* ── Grid shell ──────────────────────────────────────────────────────────── */
@@ -348,7 +329,7 @@ body.demo-light {
 /* ── Row ─────────────────────────────────────────────────────────────────── */
 .ugrid-row {
   display: flex;
-  border-bottom: 1px solid var(--ugrid-border-row);
+  /* border-bottom: 1px solid var(--ugrid-border-row); */
   transition: background 0.05s;
 }
 .ugrid-row:last-child {
@@ -373,7 +354,7 @@ body.demo-light {
   height: var(--ugrid-row-height);
   display: flex;
   align-items: center;
-  border-right: 1px solid var(--ugrid-border-row);
+  border-right: 1px dotted var(--ugrid-border-row);
   flex-shrink: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -412,16 +393,10 @@ body.demo-light {
   opacity: 1;
 }
 .ugrid-filter-icon-btn:hover {
-  background: var(--ugrid-bg-row-hover, #f1f5f9);
   color: var(--ugrid-text, #1a1a2e);
 }
 .ugrid-filter-icon-btn--active {
   opacity: 1;
-  color: #3b82f6;
-}
-.ugrid-filter-icon-btn--active:hover {
-  background: #fee2e2;
-  color: #ef4444;
 }
 
 /* ── Filter row clear button (× inside filter input cells) ─────────────── */
@@ -445,7 +420,8 @@ body.demo-light {
   padding: 0;
   z-index: 1;
 }
-.ugrid-filter-clear-btn:hover {
+.ugrid-filter-clear-btn:hover,
+.ugrid-filter-clear-btn:focus-visible {
   background: var(--ugrid-bg-filter-focus, #f8fafc);
   color: #ef4444;
 }
@@ -472,6 +448,18 @@ body.demo-light {
 .ugrid-row--selected .ugrid-cell.ugrid-cell--badge span {
   background: var(--ugrid-badge-selected-bg);
   color: var(--ugrid-badge-selected-text);
+}
+
+.ugrid-cell.ugrid-cell--checkbox {
+  justify-content: center;
+}
+
+.ugrid-cell.ugrid-cell--checkbox.ugrid-cell--checked {
+  color: #10b981;
+}
+
+.ugrid-cell.ugrid-cell--checkbox.ugrid-cell--unchecked {
+  color: #ff0000;
 }
 
 /* Score cell: progress bar + numeric label side by side */
