@@ -53,11 +53,11 @@
   --ugrid-dk-bg-filter: #1a1a1a;
   --ugrid-dk-bg-filter-input: #111111;
   --ugrid-dk-bg-filter-focus: #000000;
-  --ugrid-dk-bg-header-hover: #222222;
-  --ugrid-dk-bg-header-sorted: #2d2d2d;
+  --ugrid-dk-bg-header-hover: #111827;
+  --ugrid-dk-bg-header-sorted: #091422;
   --ugrid-dk-text: #e0e0e0;
   --ugrid-dk-text-header: #a0a0a0;
-  --ugrid-dk-text-header-sorted: #60a5fa;
+  --ugrid-dk-text-header-sorted: #c6c6c6;
   --ugrid-dk-text-muted: #666666;
   --ugrid-dk-text-filter: #e0e0e0;
   --ugrid-dk-focus-ring: rgba(96, 165, 250, 0.2);
