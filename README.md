@@ -4,6 +4,8 @@ A fully open-source, MIT-licensed, high-performance data grid with **no enterpri
 
 Built on a vanilla JavaScript core with zero runtime dependencies, framework adapters for React, Vue, Svelte, and Angular are provided as thin wrappers around the same engine.
 
+NOTE: This version is almost completely vibe coded. I don't know if you'd even call it beta. Use it accordingly, and ay your own risk!
+
 [![CI](https://github.com/harvey-withington/ultimate-grid/actions/workflows/ci.yml/badge.svg)](https://github.com/harvey-withington/ultimate-grid/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
