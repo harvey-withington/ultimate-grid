@@ -14,14 +14,15 @@
     }
   },
   "scripts": {
-    "build": "tsc --noEmit",
-    "lint": "tsc --noEmit"
+    "build": "rollup -c rollup.config.js",
+    "demo":  "vite --config vite.config.ts",
+    "dev":   "vite --config vite.config.ts",
+    "lint":  "tsc --noEmit"
   },
   "peerDependencies": {
     "svelte": ">=4.0.0"
   },
   "devDependencies": {
-    "typescript": "^5.4.5",
     "svelte": "^4.2.18"
   },
   "license": "MIT"
