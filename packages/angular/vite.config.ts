@@ -8,7 +8,6 @@ export default defineConfig({
   root: resolve(__dirname, 'demo'),
   server: {
     port: 5178,
-    open: true,
     fs: {
       allow: [resolve(__dirname, '..'), resolve(__dirname, '../../core')],
     },

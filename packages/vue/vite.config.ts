@@ -10,7 +10,6 @@ export default defineConfig({
   plugins: [vue()],
   server: {
     port: 5176,
-    open: true,
     fs: {
       allow: [resolve(__dirname, '..'), resolve(__dirname, '../../core')],
     },

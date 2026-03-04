@@ -10,7 +10,6 @@ export default defineConfig({
   plugins: [svelte({ preprocess: vitePreprocess() })],
   server: {
     port: 5177,
-    open: true,
     fs: {
       allow: [resolve(__dirname, '..'), resolve(__dirname, '../../core')],
     },
