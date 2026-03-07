@@ -319,6 +319,7 @@ export interface SelectionModel {
   moveFocus(direction: Direction, extend?: boolean): void;
   selectEntireRow(rowId: string, extend?: boolean): void;
   selectEntireColumn(colId: string, extend?: boolean): void;
+  selectAllCells(): void;
   getCellRangeEdges(coord: CellCoord): { top: boolean; right: boolean; bottom: boolean; left: boolean } | null;
   isColumnInRange(colId: string): boolean;
   isRowInRange(rowId: string): boolean;

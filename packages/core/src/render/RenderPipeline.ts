@@ -193,8 +193,13 @@ export class RenderPipeline<TData = unknown> {
       cell.appendChild(sortIcon);
       cell.addEventListener('mousedown', (e) => {
         if (this._selModel.unit === 'cell' && !(e.ctrlKey || e.metaKey)) {
-          this._selModel.selectEntireColumn(col.colId);
-          this._colHeaderDragAnchor = col.colId;
+          if (col.def.rowHeader) {
+            // Corner cell (row-header header) → select all data cells
+            this._selModel.selectAllCells();
+          } else {
+            this._selModel.selectEntireColumn(col.colId);
+            this._colHeaderDragAnchor = col.colId;
+          }
           e.preventDefault();
           return;
         }
@@ -460,7 +465,11 @@ export class RenderPipeline<TData = unknown> {
         case 'a':
           if (e.ctrlKey || e.metaKey) {
             e.preventDefault();
-            this._selModel.selectAll();
+            if (this._selModel.unit === 'cell') {
+              this._selModel.selectAllCells();
+            } else {
+              this._selModel.selectAll();
+            }
           }
           break;
         case 'Escape':

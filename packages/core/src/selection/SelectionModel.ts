@@ -321,6 +321,47 @@ export class SelectionModel implements ISelectionModel {
   }
 
   /**
+   * Select all cells: creates a single range from the first data column / first
+   * row to the last data column / last row. Used by Ctrl+A and corner-cell click
+   * in cell (spreadsheet) mode.
+   */
+  selectAllCells(): void {
+    if (this.mode === 'none') return;
+    const cols = this._colModel?.visible;
+    const rows = this._rowModel.displayRows;
+    if (!cols || cols.length === 0 || rows.length === 0) return;
+
+    const firstDataCol = cols.find(c => !c.def?.rowHeader) ?? cols[0];
+    const lastDataCol  = (() => {
+      for (let i = cols.length - 1; i >= 0; i--) {
+        if (!cols[i].def?.rowHeader) return cols[i];
+      }
+      return cols[cols.length - 1];
+    })();
+
+    const firstRowId = rows[0].rowId;
+    const lastRowId  = rows[rows.length - 1].rowId;
+
+    const start: CellCoord = { rowId: firstRowId, colId: firstDataCol.colId };
+    const end:   CellCoord = { rowId: lastRowId,  colId: lastDataCol.colId };
+
+    const prev = this._focusedCell;
+    this._focusedCell = start;
+    this._anchorCell  = start;
+
+    this.selectedRanges.splice(0, this.selectedRanges.length, { start, end });
+
+    // Mark all rows as selected for backward compat
+    this.selectedRowIds.clear();
+    for (const row of rows) {
+      this.selectedRowIds.add(row.rowId);
+    }
+
+    this._emitActiveCellChanged(prev);
+    this._emit();
+  }
+
+  /**
    * Select an entire column as a cell range spanning all visible rows.
    */
   selectEntireColumn(colId: string, extend = false): void {
