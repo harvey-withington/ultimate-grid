@@ -74,6 +74,7 @@ export type {
   CellDoubleClickedEvent,
   CellKeyDownEvent,
   SelectionChangedEvent,
+  ActiveCellChangedEvent,
   SortChangedEvent,
   FilterChangedEvent,
   ColumnResizedEvent,

@@ -151,8 +151,8 @@ export class GridCore<TData = unknown> {
       },
 
       // ── Selection (stubs — SelectionPlugin will override) ──
-      selectAll() { self._bus.emit('selectionChanged', { type: 'selectionChanged', source: 'api', selectedRowIds: [] }); },
-      deselectAll() { self._bus.emit('selectionChanged', { type: 'selectionChanged', source: 'api', selectedRowIds: [] }); },
+      selectAll() { self._bus.emit('selectionChanged', { type: 'selectionChanged', source: 'api', selectedRowIds: [], focusedCell: null, selectedRanges: [] }); },
+      deselectAll() { self._bus.emit('selectionChanged', { type: 'selectionChanged', source: 'api', selectedRowIds: [], focusedCell: null, selectedRanges: [] }); },
       getSelectedRowIds(): string[] { return []; },
       getSelectedRows(): TData[] { return []; },
 

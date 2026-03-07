@@ -383,3 +383,356 @@ describe('SelectionModel', () => {
     });
   });
 });
+
+// ─── Cell selection tests ─────────────────────────────────────────────────────
+
+function makeCellSetup(mode: 'single' | 'multi' | 'range' | 'none' = 'multi') {
+  const bus = new EventBus();
+  const rowModel = new ClientRowModel<Row>(bus, 40, (d) => String(d.id));
+  const data: Row[] = [
+    { id: 1, name: 'Alice' },
+    { id: 2, name: 'Bob'   },
+    { id: 3, name: 'Carol' },
+    { id: 4, name: 'Dave'  },
+    { id: 5, name: 'Eve'   },
+  ];
+  rowModel.setRowData(data);
+  // Minimal column accessor matching the ColumnAccessor interface
+  const colModel = {
+    visible: [
+      { colId: 'id' },
+      { colId: 'name' },
+    ] as const,
+  };
+  const sel = new SelectionModel(bus, rowModel, mode, 'cell', colModel);
+  return { bus, rowModel, sel, colModel };
+}
+
+describe('SelectionModel — cell selection', () => {
+  // ─── selectCell ──────────────────────────────────────────────────────────
+
+  describe('selectCell', () => {
+    it('sets focusedCell and anchorCell', () => {
+      const { sel } = makeCellSetup();
+      sel.selectCell({ rowId: '1', colId: 'name' });
+      expect(sel.focusedCell).toEqual({ rowId: '1', colId: 'name' });
+      expect(sel.anchorCell).toEqual({ rowId: '1', colId: 'name' });
+    });
+
+    it('creates a single-cell range', () => {
+      const { sel } = makeCellSetup();
+      sel.selectCell({ rowId: '2', colId: 'id' });
+      expect(sel.selectedRanges).toHaveLength(1);
+      expect(sel.selectedRanges[0].start).toEqual({ rowId: '2', colId: 'id' });
+      expect(sel.selectedRanges[0].end).toEqual({ rowId: '2', colId: 'id' });
+    });
+
+    it('replaces ranges when extend=false', () => {
+      const { sel } = makeCellSetup();
+      sel.selectCell({ rowId: '1', colId: 'id' });
+      sel.selectCell({ rowId: '2', colId: 'name' });
+      expect(sel.selectedRanges).toHaveLength(1);
+      expect(sel.focusedCell).toEqual({ rowId: '2', colId: 'name' });
+    });
+
+    it('adds a range when extend=true in multi mode', () => {
+      const { sel } = makeCellSetup('multi');
+      sel.selectCell({ rowId: '1', colId: 'id' });
+      sel.selectCell({ rowId: '3', colId: 'name' }, true);
+      expect(sel.selectedRanges).toHaveLength(2);
+    });
+
+    it('replaces even with extend=true in single mode', () => {
+      const { sel } = makeCellSetup('single');
+      sel.selectCell({ rowId: '1', colId: 'id' });
+      sel.selectCell({ rowId: '2', colId: 'name' }, true);
+      expect(sel.selectedRanges).toHaveLength(1);
+      expect(sel.focusedCell).toEqual({ rowId: '2', colId: 'name' });
+    });
+
+    it('does nothing in none mode', () => {
+      const { sel } = makeCellSetup('none');
+      sel.selectCell({ rowId: '1', colId: 'id' });
+      expect(sel.focusedCell).toBeNull();
+      expect(sel.selectedRanges).toHaveLength(0);
+    });
+
+    it('emits selectionChanged with focusedCell and selectedRanges', () => {
+      const { sel, bus } = makeCellSetup();
+      const handler = vi.fn();
+      bus.on('selectionChanged', handler);
+      sel.selectCell({ rowId: '1', colId: 'name' });
+      expect(handler).toHaveBeenCalledOnce();
+      const evt = handler.mock.calls[0][0];
+      expect(evt.focusedCell).toEqual({ rowId: '1', colId: 'name' });
+      expect(evt.selectedRanges).toHaveLength(1);
+    });
+
+    it('emits activeCellChanged', () => {
+      const { sel, bus } = makeCellSetup();
+      const handler = vi.fn();
+      bus.on('activeCellChanged', handler);
+      sel.selectCell({ rowId: '1', colId: 'id' });
+      expect(handler).toHaveBeenCalledOnce();
+      expect(handler.mock.calls[0][0].cell).toEqual({ rowId: '1', colId: 'id' });
+      expect(handler.mock.calls[0][0].previous).toBeNull();
+    });
+
+    it('tracks row in selectedRowIds for backward compat', () => {
+      const { sel } = makeCellSetup();
+      sel.selectCell({ rowId: '2', colId: 'name' });
+      expect(sel.isRowSelected('2')).toBe(true);
+    });
+  });
+
+  // ─── isCellSelected ──────────────────────────────────────────────────────
+
+  describe('isCellSelected', () => {
+    it('returns true for the focused cell', () => {
+      const { sel } = makeCellSetup();
+      sel.selectCell({ rowId: '1', colId: 'name' });
+      expect(sel.isCellSelected({ rowId: '1', colId: 'name' })).toBe(true);
+    });
+
+    it('returns false for other cells', () => {
+      const { sel } = makeCellSetup();
+      sel.selectCell({ rowId: '1', colId: 'name' });
+      expect(sel.isCellSelected({ rowId: '1', colId: 'id' })).toBe(false);
+      expect(sel.isCellSelected({ rowId: '2', colId: 'name' })).toBe(false);
+    });
+
+    it('returns false when nothing selected', () => {
+      const { sel } = makeCellSetup();
+      expect(sel.isCellSelected({ rowId: '1', colId: 'name' })).toBe(false);
+    });
+  });
+
+  // ─── selectRange / isCellInRange ─────────────────────────────────────────
+
+  describe('selectRange', () => {
+    it('creates a range from anchor to focus', () => {
+      const { sel } = makeCellSetup();
+      sel.selectRange({ rowId: '1', colId: 'id' }, { rowId: '3', colId: 'name' });
+      expect(sel.anchorCell).toEqual({ rowId: '1', colId: 'id' });
+      expect(sel.focusedCell).toEqual({ rowId: '3', colId: 'name' });
+      expect(sel.selectedRanges).toHaveLength(1);
+    });
+
+    it('isCellInRange returns true for cells within the range', () => {
+      const { sel } = makeCellSetup();
+      sel.selectRange({ rowId: '1', colId: 'id' }, { rowId: '3', colId: 'name' });
+      // All cells in the 3×2 rectangle should be in range
+      expect(sel.isCellInRange({ rowId: '1', colId: 'id' })).toBe(true);
+      expect(sel.isCellInRange({ rowId: '1', colId: 'name' })).toBe(true);
+      expect(sel.isCellInRange({ rowId: '2', colId: 'id' })).toBe(true);
+      expect(sel.isCellInRange({ rowId: '2', colId: 'name' })).toBe(true);
+      expect(sel.isCellInRange({ rowId: '3', colId: 'id' })).toBe(true);
+      expect(sel.isCellInRange({ rowId: '3', colId: 'name' })).toBe(true);
+    });
+
+    it('isCellInRange returns false for cells outside the range', () => {
+      const { sel } = makeCellSetup();
+      sel.selectRange({ rowId: '2', colId: 'id' }, { rowId: '3', colId: 'id' });
+      expect(sel.isCellInRange({ rowId: '1', colId: 'id' })).toBe(false);
+      expect(sel.isCellInRange({ rowId: '4', colId: 'id' })).toBe(false);
+      expect(sel.isCellInRange({ rowId: '2', colId: 'name' })).toBe(false);
+    });
+
+    it('replaces last range on subsequent selectRange calls (Shift behavior)', () => {
+      const { sel } = makeCellSetup();
+      sel.selectCell({ rowId: '1', colId: 'id' }); // creates initial range
+      sel.selectRange({ rowId: '1', colId: 'id' }, { rowId: '2', colId: 'name' });
+      expect(sel.selectedRanges).toHaveLength(1);
+      expect(sel.selectedRanges[0].end).toEqual({ rowId: '2', colId: 'name' });
+    });
+
+    it('preserves Ctrl-added ranges while replacing last', () => {
+      const { sel } = makeCellSetup();
+      sel.selectCell({ rowId: '1', colId: 'id' });
+      sel.selectCell({ rowId: '4', colId: 'name' }, true); // Ctrl+click → 2 ranges
+      expect(sel.selectedRanges).toHaveLength(2);
+      // Shift+extend from second cell
+      sel.selectRange({ rowId: '4', colId: 'name' }, { rowId: '5', colId: 'name' });
+      expect(sel.selectedRanges).toHaveLength(2); // first Ctrl range + replaced last
+      expect(sel.selectedRanges[0].start).toEqual({ rowId: '1', colId: 'id' }); // untouched
+    });
+
+    it('does nothing in none mode', () => {
+      const { sel } = makeCellSetup('none');
+      sel.selectRange({ rowId: '1', colId: 'id' }, { rowId: '3', colId: 'name' });
+      expect(sel.selectedRanges).toHaveLength(0);
+    });
+  });
+
+  // ─── moveFocus with columns ──────────────────────────────────────────────
+
+  describe('moveFocus with column model', () => {
+    it('moves focus left', () => {
+      const { sel } = makeCellSetup();
+      sel.selectCell({ rowId: '2', colId: 'name' });
+      sel.moveFocus('left');
+      expect(sel.focusedCell).toEqual({ rowId: '2', colId: 'id' });
+    });
+
+    it('moves focus right', () => {
+      const { sel } = makeCellSetup();
+      sel.selectCell({ rowId: '2', colId: 'id' });
+      sel.moveFocus('right');
+      expect(sel.focusedCell).toEqual({ rowId: '2', colId: 'name' });
+    });
+
+    it('clamps at leftmost column', () => {
+      const { sel } = makeCellSetup();
+      sel.selectCell({ rowId: '2', colId: 'id' });
+      sel.moveFocus('left');
+      expect(sel.focusedCell).toEqual({ rowId: '2', colId: 'id' });
+    });
+
+    it('clamps at rightmost column', () => {
+      const { sel } = makeCellSetup();
+      sel.selectCell({ rowId: '2', colId: 'name' });
+      sel.moveFocus('right');
+      expect(sel.focusedCell).toEqual({ rowId: '2', colId: 'name' });
+    });
+
+    it('moves focus up', () => {
+      const { sel } = makeCellSetup();
+      sel.selectCell({ rowId: '3', colId: 'id' });
+      sel.moveFocus('up');
+      expect(sel.focusedCell).toEqual({ rowId: '2', colId: 'id' });
+    });
+
+    it('moves focus down', () => {
+      const { sel } = makeCellSetup();
+      sel.selectCell({ rowId: '3', colId: 'id' });
+      sel.moveFocus('down');
+      expect(sel.focusedCell).toEqual({ rowId: '4', colId: 'id' });
+    });
+
+    it('Shift+arrow extends the range from anchor', () => {
+      const { sel } = makeCellSetup();
+      sel.selectCell({ rowId: '2', colId: 'id' });
+      sel.moveFocus('down', true);
+      sel.moveFocus('right', true);
+      // Anchor stays at (2, id), focus moves to (3, name)
+      expect(sel.anchorCell).toEqual({ rowId: '2', colId: 'id' });
+      expect(sel.focusedCell).toEqual({ rowId: '3', colId: 'name' });
+      // Range should cover 2×2 rectangle
+      expect(sel.isCellInRange({ rowId: '2', colId: 'id' })).toBe(true);
+      expect(sel.isCellInRange({ rowId: '2', colId: 'name' })).toBe(true);
+      expect(sel.isCellInRange({ rowId: '3', colId: 'id' })).toBe(true);
+      expect(sel.isCellInRange({ rowId: '3', colId: 'name' })).toBe(true);
+      // Outside the range
+      expect(sel.isCellInRange({ rowId: '1', colId: 'id' })).toBe(false);
+      expect(sel.isCellInRange({ rowId: '4', colId: 'id' })).toBe(false);
+    });
+
+    it('plain arrow after Shift+arrow resets to single cell', () => {
+      const { sel } = makeCellSetup();
+      sel.selectCell({ rowId: '2', colId: 'id' });
+      sel.moveFocus('down', true);  // extend
+      sel.moveFocus('down');         // collapse
+      expect(sel.selectedRanges).toHaveLength(1);
+      expect(sel.selectedRanges[0].start).toEqual(sel.selectedRanges[0].end);
+    });
+  });
+
+  // ─── setFocus ──────────────────────────────────────────────────────────
+
+  describe('setFocus', () => {
+    it('sets focusedCell without changing ranges', () => {
+      const { sel } = makeCellSetup();
+      sel.selectCell({ rowId: '1', colId: 'id' });
+      const rangesBefore = [...sel.selectedRanges];
+      sel.setFocus({ rowId: '3', colId: 'name' });
+      expect(sel.focusedCell).toEqual({ rowId: '3', colId: 'name' });
+      expect(sel.selectedRanges).toEqual(rangesBefore);
+    });
+
+    it('emits activeCellChanged with previous cell', () => {
+      const { sel, bus } = makeCellSetup();
+      sel.selectCell({ rowId: '1', colId: 'id' });
+      const handler = vi.fn();
+      bus.on('activeCellChanged', handler);
+      sel.setFocus({ rowId: '2', colId: 'name' });
+      expect(handler).toHaveBeenCalledOnce();
+      expect(handler.mock.calls[0][0].previous).toEqual({ rowId: '1', colId: 'id' });
+      expect(handler.mock.calls[0][0].cell).toEqual({ rowId: '2', colId: 'name' });
+    });
+
+    it('does not emit activeCellChanged when cell is unchanged', () => {
+      const { sel, bus } = makeCellSetup();
+      sel.selectCell({ rowId: '1', colId: 'id' });
+      const handler = vi.fn();
+      bus.on('activeCellChanged', handler);
+      sel.setFocus({ rowId: '1', colId: 'id' });
+      expect(handler).not.toHaveBeenCalled();
+    });
+  });
+
+  // ─── selectEntireRow ──────────────────────────────────────────────────────
+
+  describe('selectEntireRow', () => {
+    it('creates a range spanning all columns for the given row', () => {
+      const { sel } = makeCellSetup();
+      sel.selectEntireRow('2');
+      expect(sel.selectedRanges).toHaveLength(1);
+      expect(sel.selectedRanges[0].start).toEqual({ rowId: '2', colId: 'id' });
+      expect(sel.selectedRanges[0].end).toEqual({ rowId: '2', colId: 'name' });
+    });
+
+    it('all cells in that row are in range', () => {
+      const { sel } = makeCellSetup();
+      sel.selectEntireRow('3');
+      expect(sel.isCellInRange({ rowId: '3', colId: 'id' })).toBe(true);
+      expect(sel.isCellInRange({ rowId: '3', colId: 'name' })).toBe(true);
+      expect(sel.isCellInRange({ rowId: '2', colId: 'id' })).toBe(false);
+    });
+
+    it('extend=true adds a second range', () => {
+      const { sel } = makeCellSetup();
+      sel.selectEntireRow('1');
+      sel.selectEntireRow('3', true);
+      expect(sel.selectedRanges).toHaveLength(2);
+    });
+
+    it('does nothing in none mode', () => {
+      const { sel } = makeCellSetup('none');
+      sel.selectEntireRow('1');
+      expect(sel.selectedRanges).toHaveLength(0);
+    });
+  });
+
+  // ─── selectEntireColumn ───────────────────────────────────────────────────
+
+  describe('selectEntireColumn', () => {
+    it('creates a range spanning all rows for the given column', () => {
+      const { sel } = makeCellSetup();
+      sel.selectEntireColumn('name');
+      expect(sel.selectedRanges).toHaveLength(1);
+      expect(sel.selectedRanges[0].start).toEqual({ rowId: '1', colId: 'name' });
+      expect(sel.selectedRanges[0].end).toEqual({ rowId: '5', colId: 'name' });
+    });
+
+    it('all cells in that column are in range', () => {
+      const { sel } = makeCellSetup();
+      sel.selectEntireColumn('id');
+      expect(sel.isCellInRange({ rowId: '1', colId: 'id' })).toBe(true);
+      expect(sel.isCellInRange({ rowId: '5', colId: 'id' })).toBe(true);
+      expect(sel.isCellInRange({ rowId: '1', colId: 'name' })).toBe(false);
+    });
+
+    it('extend=true adds a second range', () => {
+      const { sel } = makeCellSetup();
+      sel.selectEntireColumn('id');
+      sel.selectEntireColumn('name', true);
+      expect(sel.selectedRanges).toHaveLength(2);
+    });
+
+    it('does nothing in none mode', () => {
+      const { sel } = makeCellSetup('none');
+      sel.selectEntireColumn('id');
+      expect(sel.selectedRanges).toHaveLength(0);
+    });
+  });
+});

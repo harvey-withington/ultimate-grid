@@ -153,6 +153,27 @@ body.demo-light {
 .demo-bar h1     { font-size: 15px; font-weight: 600; letter-spacing: 0.02em; }
 .demo-bar > span { font-size: 11px; opacity: 0.5; }
 
+/* ── Demo nav tabs ─────────────────────────────────────────────────────────── */
+.demo-nav { display: flex; gap: 2px; margin-left: 24px; }
+.demo-nav-tab {
+  padding: 5px 14px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.55);
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+.demo-nav-tab:hover { color: rgba(255,255,255,0.85); background: rgba(255,255,255,0.08); }
+.demo-nav-tab.active { color: #fff; background: rgba(255,255,255,0.15); }
+
+/* ── Page containers ──────────────────────────────────────────────────────── */
+.demo-page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
 .demo-controls { margin-left: auto; display: flex; gap: 8px; align-items: center; }
 .demo-controls button {
   background: rgba(255,255,255,0.12);

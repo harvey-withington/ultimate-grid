@@ -40,6 +40,8 @@
   --ugrid-lt-scrollbar-track: #f1f5f9;
   --ugrid-lt-scrollbar-thumb: #cbd5e1;
   --ugrid-lt-scrollbar-thumb-hover: #94a3b8;
+  --ugrid-lt-selection-bg: rgba(14, 165, 233, 0.14);
+  --ugrid-lt-active-cell-border: #0ea5e9;
 
   /* --- Dark Palette (Edit these to change dark mode globally) --- */
   --ugrid-dk-border: #232323;
@@ -53,8 +55,8 @@
   --ugrid-dk-bg-filter: #1a1a1a;
   --ugrid-dk-bg-filter-input: #111111;
   --ugrid-dk-bg-filter-focus: #000000;
-  --ugrid-dk-bg-header-hover: #111827;
-  --ugrid-dk-bg-header-sorted: #091422;
+  --ugrid-dk-bg-header-hover: #1a2744;
+  --ugrid-dk-bg-header-sorted: #1e3a5f;
   --ugrid-dk-text: #e0e0e0;
   --ugrid-dk-text-header: #a0a0a0;
   --ugrid-dk-text-header-sorted: #c6c6c6;
@@ -70,6 +72,8 @@
   --ugrid-dk-scrollbar-track: #111111;
   --ugrid-dk-scrollbar-thumb: #444444;
   --ugrid-dk-scrollbar-thumb-hover: #555555;
+  --ugrid-dk-selection-bg: rgba(59, 130, 246, 0.25);
+  --ugrid-dk-active-cell-border: #60a5fa;
 
   /* --- Active theme mappings (Default to Light) --- */
   --ugrid-border-color: var(--ugrid-lt-border);
@@ -102,6 +106,8 @@
   --ugrid-scrollbar-track: var(--ugrid-lt-scrollbar-track);
   --ugrid-scrollbar-thumb: var(--ugrid-lt-scrollbar-thumb);
   --ugrid-scrollbar-thumb-hover: var(--ugrid-lt-scrollbar-thumb-hover);
+  --ugrid-selection-bg: var(--ugrid-lt-selection-bg);
+  --ugrid-active-cell-border: var(--ugrid-lt-active-cell-border);
 }
 
 /* --- Switch to Dark Theme variables --- */
@@ -138,6 +144,8 @@
     --ugrid-scrollbar-track: var(--ugrid-dk-scrollbar-track);
     --ugrid-scrollbar-thumb: var(--ugrid-dk-scrollbar-thumb);
     --ugrid-scrollbar-thumb-hover: var(--ugrid-dk-scrollbar-thumb-hover);
+    --ugrid-selection-bg: var(--ugrid-dk-selection-bg);
+    --ugrid-active-cell-border: var(--ugrid-dk-active-cell-border);
   }
 }
 
@@ -173,6 +181,8 @@ body.demo-dark,
   --ugrid-scrollbar-track: var(--ugrid-dk-scrollbar-track);
   --ugrid-scrollbar-thumb: var(--ugrid-dk-scrollbar-thumb);
   --ugrid-scrollbar-thumb-hover: var(--ugrid-dk-scrollbar-thumb-hover);
+  --ugrid-selection-bg: var(--ugrid-dk-selection-bg);
+  --ugrid-active-cell-border: var(--ugrid-dk-active-cell-border);
 }
 
 /* ── Grid shell ──────────────────────────────────────────────────────────── */
@@ -306,6 +316,7 @@ body.demo-dark,
   flex: 1;
   overflow: auto;
   position: relative;
+  outline: none;
   -webkit-user-select: none;
   user-select: none;
   min-height: 0;
@@ -331,6 +342,7 @@ body.demo-dark,
   display: flex;
   /* border-bottom: 1px solid var(--ugrid-border-row); */
   transition: background 0.05s;
+  overflow: hidden;
 }
 .ugrid-row:last-child {
   border-bottom: none;
@@ -348,10 +360,22 @@ body.demo-dark,
   background: var(--ugrid-bg-row-selected) !important;
 }
 
+/* ── Cell-mode overrides (spreadsheet) ─── suppress row-level selection visuals */
+.ugrid--cell-mode .ugrid-row:hover {
+  background: transparent;
+}
+.ugrid--cell-mode .ugrid-row.ugrid-row--even:hover {
+  background: var(--ugrid-bg-row-even);
+}
+.ugrid--cell-mode .ugrid-row.ugrid-row--selected {
+  background: inherit !important;
+}
+
 /* ── Cell ────────────────────────────────────────────────────────────────── */
 .ugrid-cell {
   padding: 0 12px;
-  height: var(--ugrid-row-height);
+  height: 100%;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   border-right: 1px dotted var(--ugrid-border-row);
@@ -364,6 +388,69 @@ body.demo-dark,
 }
 .ugrid-cell:last-child {
   border-right: none;
+}
+
+/* Cell-mode: solid borders on all edges (Excel-style grid lines) */
+.ugrid--cell-mode .ugrid-cell {
+  border-right: 1px solid var(--ugrid-border-row);
+  border-bottom: 1px solid var(--ugrid-border-row);
+}
+.ugrid--cell-mode .ugrid-cell:last-child {
+  border-right: 1px solid var(--ugrid-border-row);
+}
+
+/* Cell-level selection (unit='cell' mode) */
+.ugrid-cell.ugrid-cell--in-range {
+  background: var(--ugrid-selection-bg);
+}
+.ugrid-cell.ugrid-cell--focused {
+  outline: 2px solid var(--ugrid-active-cell-border);
+  outline-offset: -2px;
+  z-index: 2;
+  position: relative;
+}
+
+/* Range perimeter border — drawn via ::after overlay so cell layout is unaffected.
+   Each edge is an independent CSS custom property, composable from multiple classes. */
+.ugrid-cell.ugrid-cell--in-range {
+  position: relative;
+}
+.ugrid-cell.ugrid-cell--in-range::after {
+  content: '';
+  position: absolute;
+  top: -1px; right: -1px; bottom: -1px; left: -1px;
+  pointer-events: none;
+  border-top:    var(--_range-bt, 0);
+  border-right:  var(--_range-br, 0);
+  border-bottom: var(--_range-bb, 0);
+  border-left:   var(--_range-bl, 0);
+  z-index: 3;
+}
+.ugrid-cell.ugrid-cell--range-top    { --_range-bt: 2px solid var(--ugrid-active-cell-border); }
+.ugrid-cell.ugrid-cell--range-bottom { --_range-bb: 2px solid var(--ugrid-active-cell-border); }
+.ugrid-cell.ugrid-cell--range-left   { --_range-bl: 2px solid var(--ugrid-active-cell-border); }
+.ugrid-cell.ugrid-cell--range-right  { --_range-br: 2px solid var(--ugrid-active-cell-border); }
+
+/* Header cell highlight when its column intersects the selection */
+.ugrid-header-cell.ugrid-header-cell--in-range {
+  background: var(--ugrid-bg-header-sorted);
+  color: var(--ugrid-text-header-sorted);
+}
+
+/* Row-header column (spreadsheet row numbers) */
+.ugrid-cell.ugrid-cell--row-header {
+  background: var(--ugrid-bg-header);
+  color: var(--ugrid-text-muted);
+  font-size: 11px;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+  border-right: 1px solid var(--ugrid-border-color);
+}
+.ugrid-cell.ugrid-cell--row-header.ugrid-cell--in-range {
+  background: var(--ugrid-bg-header-sorted);
+  color: var(--ugrid-text-header-sorted);
 }
 
 /* ── Filter icon button (appended to cells with filterIcon: true) ──────── */

@@ -78,6 +78,7 @@ export class UltimateGridComponent<TData = unknown>
   @Output() columnMoved      = new EventEmitter<GridEventMap['columnMoved']>();
   @Output() cellClicked      = new EventEmitter<GridEventMap['cellClicked']>();
   @Output() cellDoubleClicked= new EventEmitter<GridEventMap['cellDoubleClicked']>();
+  @Output() activeCellChanged = new EventEmitter<GridEventMap['activeCellChanged']>();
 
   // ─── Internal ──────────────────────────────────────────────────────────────
 
@@ -137,6 +138,7 @@ export class UltimateGridComponent<TData = unknown>
       this.api.on('columnMoved',       e => this.columnMoved.emit(e)),
       this.api.on('cellClicked',       e => this.cellClicked.emit(e)),
       this.api.on('cellDoubleClicked', e => this.cellDoubleClicked.emit(e)),
+      this.api.on('activeCellChanged',  e => this.activeCellChanged.emit(e)),
     );
 
     this.gridReady.emit(this.api);

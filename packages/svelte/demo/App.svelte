@@ -17,6 +17,7 @@
   import { onMount, onDestroy } from 'svelte';
   import UltimateGrid from '../src/UltimateGrid.svelte';
   import type { GridApi, ColumnDef, SortState, FilterState, Column, RowNode } from '../../core/src/types.ts';
+  import { generateSpreadsheetData, SS_COLS, spreadsheetCellRenderer, formatCoord, formatRange, countCellsInRanges } from '../../core/demo/spreadsheet-data.ts';
 
   // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -144,7 +145,11 @@
       .join(', ');
   }
 
-  // ─── App state ───────────────────────────────────────────────────────────────
+  // ─── Page switching ─────────────────────────────────────────────────────────
+
+  let page: 'datagrid' | 'spreadsheet' = 'datagrid';
+
+  // ─── App state ─────────────────────────────────────────────────────────────
 
   let apiRef: GridApi<Employee> | null = null;
   let total = 2000;
@@ -255,6 +260,38 @@
     applyTheme();
   }
 
+  // ─── Spreadsheet state ───────────────────────────────────────────────────────
+
+  let ssApiRef: GridApi | null = null;
+  let ssRowData = generateSpreadsheetData(200);
+  const ssColDefs = SS_COLS as ColumnDef[];
+  const ssOptions = { selectionUnit: 'cell' as const, getRowId: (d: any) => String(d.row) };
+
+  let ssActiveCell    = '\u2013';
+  let ssRange         = '\u2013';
+  let ssSelectedCount = 0;
+
+  function onSsGridReady(api: GridApi): void {
+    ssApiRef = api;
+  }
+
+  function onSsSelectionChanged(e: any): void {
+    ssActiveCell    = formatCoord(e.focusedCell);
+    ssRange         = formatRange(e.selectedRanges ?? []);
+    ssSelectedCount = countCellsInRanges(e.selectedRanges ?? []);
+  }
+
+  function onSsActiveCellChanged(e: any): void {
+    ssActiveCell = formatCoord(e.cell);
+  }
+
+  function ssClearSelection(): void {
+    ssApiRef?.deselectAll();
+    ssActiveCell    = '\u2013';
+    ssRange         = '\u2013';
+    ssSelectedCount = 0;
+  }
+
   // ─── Lifecycle ────────────────────────────────────────────────────────────────
 
   function handleKeyDown(e: KeyboardEvent): void {
@@ -271,10 +308,15 @@
   });
 </script>
 
-<!-- ── Top bar ──────────────────────────────────────────────────────────────── -->
+<!-- ── Top bar ────────────────────────────────────────────────────────────────── -->
 <div class="demo-bar">
   <h1>&#9889; Ultimate Data Grid</h1>
-  <span>Svelte wrapper demo</span>
+  <nav class="demo-nav">
+    <!-- svelte-ignore a11y-invalid-attribute -->
+    <a class="demo-nav-tab" class:active={page === 'datagrid'} href="#" on:click|preventDefault={() => page = 'datagrid'}>Data Grid</a>
+    <!-- svelte-ignore a11y-invalid-attribute -->
+    <a class="demo-nav-tab" class:active={page === 'spreadsheet'} href="#" on:click|preventDefault={() => page = 'spreadsheet'}>Spreadsheet</a>
+  </nav>
   <span class="demo-badge">Svelte 4</span>
   <div class="demo-controls">
     <button
@@ -288,53 +330,82 @@
   </div>
 </div>
 
-<!-- ── Stats bar ─────────────────────────────────────────────────────────────── -->
-<div class="demo-stats">
-  <span class="stat-item">
-    Showing <strong id="stat-showing">{statShowing}</strong> of <strong>{statTotal}</strong> rows
-  </span>
-  <span class="stat-item">
-    Columns: <strong>{statCols}</strong>
-  </span>
-  <span class="stat-item">
-    Sort: <strong>{statSort}</strong>
-    {#if statHasSort}
-      <button class="stat-clear" title="Clear sort" on:click={clearSort}>✕</button>
-    {/if}
-  </span>
-  <span class="stat-item">
-    Selected: <strong>{statSelected}</strong>
-    {#if statSelected > 0}
-      <button class="stat-clear" title="Clear selection" on:click={clearSelection}>✕</button>
-    {/if}
-  </span>
-  {#if statFilterText}
-    <span class="stat-item stat-item--filter active">
-      <em class="stat-filter-icon">⊿</em>
-      <span>{statFilterText}</span>
-      <button class="stat-clear" title="Clear filters" on:click={clearFilters}>✕</button>
+<!-- ══════════ PAGE: Data Grid ══════════ -->
+{#if page === 'datagrid'}
+<div class="demo-page">
+  <div class="demo-stats">
+    <span class="stat-item">
+      Showing <strong id="stat-showing">{statShowing}</strong> of <strong>{statTotal}</strong> rows
     </span>
-  {/if}
-  <span class="stat-actions">
-    <button on:click={addRow}>+ Add Row</button>
-    <button on:click={removeSelected} disabled={statSelected === 0}>Remove Selected</button>
-  </span>
+    <span class="stat-item">
+      Columns: <strong>{statCols}</strong>
+    </span>
+    <span class="stat-item">
+      Sort: <strong>{statSort}</strong>
+      {#if statHasSort}
+        <button class="stat-clear" title="Clear sort" on:click={clearSort}>✕</button>
+      {/if}
+    </span>
+    <span class="stat-item">
+      Selected: <strong>{statSelected}</strong>
+      {#if statSelected > 0}
+        <button class="stat-clear" title="Clear selection" on:click={clearSelection}>✕</button>
+      {/if}
+    </span>
+    {#if statFilterText}
+      <span class="stat-item stat-item--filter active">
+        <em class="stat-filter-icon">⊿</em>
+        <span>{statFilterText}</span>
+        <button class="stat-clear" title="Clear filters" on:click={clearFilters}>✕</button>
+      </span>
+    {/if}
+    <span class="stat-actions">
+      <button on:click={addRow}>+ Add Row</button>
+      <button on:click={removeSelected} disabled={statSelected === 0}>Remove Selected</button>
+    </span>
+  </div>
+  <div class="demo-grid-wrap">
+    <UltimateGrid
+      columnDefs={COLUMN_DEFS_UNTYPED}
+      {rowData}
+      selectionMode="multi"
+      rowHeight={36}
+      cellRenderer={employeeCellRenderer}
+      {onGridReady}
+      {onSortChanged}
+      {onFilterChanged}
+      {onSelectionChanged}
+    />
+  </div>
 </div>
+{/if}
 
-<!-- ── Grid ──────────────────────────────────────────────────────────────────── -->
-<div class="demo-grid-wrap">
-  <UltimateGrid
-    columnDefs={COLUMN_DEFS_UNTYPED}
-    {rowData}
-    selectionMode="multi"
-    rowHeight={36}
-    cellRenderer={employeeCellRenderer}
-    {onGridReady}
-    {onSortChanged}
-    {onFilterChanged}
-    {onSelectionChanged}
-  />
+<!-- ══════════ PAGE: Spreadsheet ══════════ -->
+{#if page === 'spreadsheet'}
+<div class="demo-page">
+  <div class="demo-stats">
+    <span class="stat-item">Active cell: <strong>{ssActiveCell}</strong></span>
+    <span class="stat-item">Range: <strong>{ssRange}</strong></span>
+    <span class="stat-item">Selected cells: <strong>{ssSelectedCount}</strong></span>
+    <span class="stat-actions">
+      <button on:click={ssClearSelection}>Clear Selection</button>
+    </span>
+  </div>
+  <div class="demo-grid-wrap">
+    <UltimateGrid
+      columnDefs={ssColDefs}
+      rowData={ssRowData}
+      selectionMode="multi"
+      rowHeight={28}
+      cellRenderer={spreadsheetCellRenderer}
+      options={ssOptions}
+      onGridReady={onSsGridReady}
+      onSelectionChanged={onSsSelectionChanged}
+      onActiveCellChanged={onSsActiveCellChanged}
+    />
+  </div>
 </div>
+{/if}
 
 <!-- ── Help modal ────────────────────────────────────────────────────────────── -->
 <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->

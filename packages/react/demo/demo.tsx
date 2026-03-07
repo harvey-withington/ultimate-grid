@@ -18,6 +18,8 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { UltimateGrid } from '../src/UltimateGrid.tsx';
 import type { GridApi, ColumnDef, SortState, FilterState, Column, RowNode } from '../../core/src/types.ts';
+import { generateSpreadsheetData, SS_COLS, spreadsheetCellRenderer, formatCoord, formatRange, countCellsInRanges } from '../../core/demo/spreadsheet-data.ts';
+import type { SpreadsheetRow } from '../../core/demo/spreadsheet-data.ts';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -267,12 +269,46 @@ function App() {
     updateStats();
   }, [updateStats]);
 
+  // ── Page switching ───────────────────────────────────────────────────────
+  const [page, setPage] = useState<'datagrid' | 'spreadsheet'>('datagrid');
+
+  // ── Spreadsheet state ────────────────────────────────────────────────────
+  const ssApiRef = useRef<GridApi<SpreadsheetRow> | null>(null);
+  const [ssRowData] = useState(() => generateSpreadsheetData(200));
+  const [ssStats, setSsStats] = useState({ activeCell: '\u2013', range: '\u2013', selectedCount: 0 });
+
+  const ssOptions = useRef({ selectionUnit: 'cell' as const, getRowId: (d: SpreadsheetRow) => String(d.row) });
+
+  const handleSsGridReady = useCallback((api: GridApi<SpreadsheetRow>) => {
+    ssApiRef.current = api;
+  }, []);
+
+  const handleSsSelectionChanged = useCallback((e: any) => {
+    setSsStats({
+      activeCell:    formatCoord(e.focusedCell),
+      range:         formatRange(e.selectedRanges ?? []),
+      selectedCount: countCellsInRanges(e.selectedRanges ?? []),
+    });
+  }, []);
+
+  const handleSsActiveCellChanged = useCallback((e: any) => {
+    setSsStats(prev => ({ ...prev, activeCell: formatCoord(e.cell) }));
+  }, []);
+
+  const ssClearSelection = useCallback(() => {
+    ssApiRef.current?.deselectAll();
+    setSsStats({ activeCell: '\u2013', range: '\u2013', selectedCount: 0 });
+  }, []);
+
   return (
     <>
       {/* ── Top bar ─────────────────────────────────────────────────────── */}
       <div className="demo-bar">
         <h1>&#9889; Ultimate Data Grid</h1>
-        <span>React wrapper demo</span>
+        <nav className="demo-nav">
+          <a className={`demo-nav-tab${page === 'datagrid' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setPage('datagrid'); }}>Data Grid</a>
+          <a className={`demo-nav-tab${page === 'spreadsheet' ? ' active' : ''}`} href="#" onClick={e => { e.preventDefault(); setPage('spreadsheet'); }}>Spreadsheet</a>
+        </nav>
         <span className="demo-badge">React 19</span>
         <div className="demo-controls">
           <button
@@ -286,53 +322,82 @@ function App() {
         </div>
       </div>
 
-      {/* ── Stats bar ───────────────────────────────────────────────────── */}
-      <div className="demo-stats">
-        <span className="stat-item">
-          Showing <strong id="stat-showing">{stats.showing}</strong> of <strong>{stats.total}</strong> rows
-        </span>
-        <span className="stat-item">
-          Columns: <strong>{stats.cols}</strong>
-        </span>
-        <span className="stat-item">
-          Sort: <strong>{stats.sort}</strong>
-          {stats.hasSort && (
-            <button className="stat-clear" title="Clear sort" onClick={clearSort}>✕</button>
-          )}
-        </span>
-        <span className="stat-item">
-          Selected: <strong>{stats.selected}</strong>
-          {stats.selected > 0 && (
-            <button className="stat-clear" title="Clear selection" onClick={clearSelection}>✕</button>
-          )}
-        </span>
-        {stats.filterText && (
-          <span className="stat-item stat-item--filter active">
-            <em className="stat-filter-icon">⊿</em>
-            <span>{stats.filterText}</span>
-            <button className="stat-clear" title="Clear filters" onClick={clearFilters}>✕</button>
-          </span>
-        )}
-        <span className="stat-actions">
-          <button onClick={addRow}>+ Add Row</button>
-          <button onClick={removeSelected} disabled={stats.selected === 0}>Remove Selected</button>
-        </span>
-      </div>
+      {/* ══════════ PAGE: Data Grid ══════════ */}
+      {page === 'datagrid' && (
+        <div className="demo-page">
+          <div className="demo-stats">
+            <span className="stat-item">
+              Showing <strong id="stat-showing">{stats.showing}</strong> of <strong>{stats.total}</strong> rows
+            </span>
+            <span className="stat-item">
+              Columns: <strong>{stats.cols}</strong>
+            </span>
+            <span className="stat-item">
+              Sort: <strong>{stats.sort}</strong>
+              {stats.hasSort && (
+                <button className="stat-clear" title="Clear sort" onClick={clearSort}>✕</button>
+              )}
+            </span>
+            <span className="stat-item">
+              Selected: <strong>{stats.selected}</strong>
+              {stats.selected > 0 && (
+                <button className="stat-clear" title="Clear selection" onClick={clearSelection}>✕</button>
+              )}
+            </span>
+            {stats.filterText && (
+              <span className="stat-item stat-item--filter active">
+                <em className="stat-filter-icon">⊿</em>
+                <span>{stats.filterText}</span>
+                <button className="stat-clear" title="Clear filters" onClick={clearFilters}>✕</button>
+              </span>
+            )}
+            <span className="stat-actions">
+              <button onClick={addRow}>+ Add Row</button>
+              <button onClick={removeSelected} disabled={stats.selected === 0}>Remove Selected</button>
+            </span>
+          </div>
+          <div className="demo-grid-wrap">
+            <UltimateGrid<Employee>
+              columnDefs={COLUMN_DEFS}
+              rowData={rowData}
+              selectionMode="multi"
+              rowHeight={36}
+              cellRenderer={employeeCellRenderer}
+              onGridReady={handleGridReady}
+              onSortChanged={handleSortChanged}
+              onFilterChanged={handleFilterChanged}
+              onSelectionChanged={handleSelectionChanged}
+            />
+          </div>
+        </div>
+      )}
 
-      {/* ── Grid ────────────────────────────────────────────────────────── */}
-      <div className="demo-grid-wrap">
-        <UltimateGrid<Employee>
-          columnDefs={COLUMN_DEFS}
-          rowData={rowData}
-          selectionMode="multi"
-          rowHeight={36}
-          cellRenderer={employeeCellRenderer}
-          onGridReady={handleGridReady}
-          onSortChanged={handleSortChanged}
-          onFilterChanged={handleFilterChanged}
-          onSelectionChanged={handleSelectionChanged}
-        />
-      </div>
+      {/* ══════════ PAGE: Spreadsheet ══════════ */}
+      {page === 'spreadsheet' && (
+        <div className="demo-page">
+          <div className="demo-stats">
+            <span className="stat-item">Active cell: <strong>{ssStats.activeCell}</strong></span>
+            <span className="stat-item">Range: <strong>{ssStats.range}</strong></span>
+            <span className="stat-item">Selected cells: <strong>{ssStats.selectedCount}</strong></span>
+            <span className="stat-actions">
+              <button onClick={ssClearSelection}>Clear Selection</button>
+            </span>
+          </div>
+          <div className="demo-grid-wrap">
+            <UltimateGrid<SpreadsheetRow>
+              columnDefs={SS_COLS as ColumnDef<SpreadsheetRow>[]}
+              rowData={ssRowData}
+              selectionMode="multi"
+              rowHeight={28}
+              cellRenderer={spreadsheetCellRenderer}
+              options={ssOptions.current}
+              onGridReady={handleSsGridReady}
+              onSelectionChanged={handleSsSelectionChanged}
+              onActiveCellChanged={handleSsActiveCellChanged}
+            />
+          </div>
+        </div>
+      )}
 
       {/* ── Help modal ──────────────────────────────────────────────────── */}
       <div

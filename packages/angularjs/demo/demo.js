@@ -12,6 +12,7 @@
 import '../../core/src/styles/ugrid.css';
 import '../../core/demo/demo-shared.css';
 import '../src/ultimate-grid-angularjs.js';  // registers the 'ultimateGrid' module
+import { generateSpreadsheetData, SS_COLS, spreadsheetCellRenderer, formatCoord, formatRange, countCellsInRanges } from '../../core/demo/spreadsheet-data.ts';
 
 // ─── Data helpers ─────────────────────────────────────────────────────────────
 
@@ -121,6 +122,10 @@ angular.module('ugridDemo', ['ultimateGrid'])
 .controller('DemoCtrl', ['$scope', '$rootScope', function($scope, $rootScope) {
   const vm = this;
 
+  // ── Page switching ─────────────────────────────────────────────────────────
+  vm.page = 'datagrid';
+  vm.showPage = function(id) { vm.page = id; };
+
   // ── Column definitions ────────────────────────────────────────────────────
   vm.columnDefs = [
     { key: 'id',         field: 'id',         headerName: '#',          width: 60  },
@@ -174,10 +179,12 @@ angular.module('ugridDemo', ['ultimateGrid'])
 
   // ── Listen to forwarded grid events ───────────────────────────────────────
   $rootScope.$on('ugrid:selectionChanged', function(_, e) {
+    if (vm.page !== 'datagrid') return;
     vm.stats.selected = e.selectedRowIds.length;
   });
 
   $rootScope.$on('ugrid:sortChanged', function(_, e) {
+    if (vm.page !== 'datagrid') return;
     vm.stats.hasSort = e.sortState.length > 0;
     vm.stats.sort    = vm.stats.hasSort
       ? e.sortState.map(function(s) { return s.colId + ' ' + s.direction; }).join(', ')
@@ -185,11 +192,13 @@ angular.module('ugridDemo', ['ultimateGrid'])
   });
 
   $rootScope.$on('ugrid:filterChanged', function(_, e) {
+    if (vm.page !== 'datagrid') return;
     vm.stats.showing     = vm.gridApi ? vm.gridApi.getDisplayedRowCount() : vm.rowData.length;
     vm.stats.filterText  = buildFilterSummary(e.filterState || {});
   });
 
   $rootScope.$on('ugrid:rowDataChanged', function() {
+    if (vm.page !== 'datagrid') return;
     vm.stats.total   = vm.rowData.length;
     vm.stats.showing = vm.gridApi ? vm.gridApi.getDisplayedRowCount() : vm.rowData.length;
   });
@@ -239,6 +248,41 @@ angular.module('ugridDemo', ['ultimateGrid'])
   vm.clearSelection = function() {
     if (vm.gridApi) vm.gridApi.deselectAll();
     vm.stats.selected = 0;
+  };
+
+  // ── Spreadsheet mode ──────────────────────────────────────────────────────
+  vm.ssColumnDefs = SS_COLS;
+  vm.ssRowData    = generateSpreadsheetData(200);
+  vm.ssGridOptions = {
+    getRowId:       function(d) { return String(d.row); },
+    rowHeight:      28,
+    selectionUnit:  'cell',
+    cellRenderer:   spreadsheetCellRenderer,
+  };
+  vm.ssGridApi = null;
+  vm.ssStats = { activeCell: '\u2013', range: '\u2013', selectedCount: 0 };
+
+  vm.onSsGridReady = function(api) {
+    vm.ssGridApi = api;
+  };
+
+  $rootScope.$on('ugrid:selectionChanged', function(_, e) {
+    if (vm.page === 'spreadsheet' && e.selectedRanges) {
+      vm.ssStats.activeCell    = formatCoord(e.focusedCell);
+      vm.ssStats.range         = formatRange(e.selectedRanges);
+      vm.ssStats.selectedCount = countCellsInRanges(e.selectedRanges);
+    }
+  });
+
+  $rootScope.$on('ugrid:activeCellChanged', function(_, e) {
+    if (vm.page === 'spreadsheet') {
+      vm.ssStats.activeCell = formatCoord(e.cell);
+    }
+  });
+
+  vm.ssClearSelection = function() {
+    if (vm.ssGridApi) vm.ssGridApi.deselectAll();
+    vm.ssStats = { activeCell: '\u2013', range: '\u2013', selectedCount: 0 };
   };
 
   // ── Theme ─────────────────────────────────────────────────────────────────

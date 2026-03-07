@@ -53,6 +53,7 @@ export function createGrid<TData = unknown>(
     core.rowModel,
     gridOptions.selectionMode ?? 'multi',
     gridOptions.selectionUnit ?? 'row',
+    core.columnModel,
   );
 
   // 3. Render pipeline — only pass defined values so DEFAULTS apply correctly

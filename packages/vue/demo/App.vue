@@ -17,6 +17,8 @@ import '../../core/demo/demo-shared.css';
 import { ref, reactive, computed, onMounted, onUnmounted } from 'vue';
 import UltimateGrid from '../src/UltimateGrid.vue';
 import type { GridApi, ColumnDef, SortState, FilterState, Column, RowNode } from '../../core/src/types.ts';
+import { generateSpreadsheetData, SS_COLS, spreadsheetCellRenderer, formatCoord, formatRange, countCellsInRanges } from '../../core/demo/spreadsheet-data.ts';
+import type { SpreadsheetRow } from '../../core/demo/spreadsheet-data.ts';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -142,6 +144,11 @@ function buildFilterSummary(filterState: FilterState): string {
     .join(', ');
 }
 
+// ─── Page switching ──────────────────────────────────────────────────────────
+
+const page = ref<'datagrid' | 'spreadsheet'>('datagrid');
+function showPage(id: 'datagrid' | 'spreadsheet') { page.value = id; }
+
 // ─── App state ────────────────────────────────────────────────────────────────
 
 const apiRef      = ref<GridApi<Employee> | null>(null);
@@ -258,6 +265,40 @@ function toggleTheme(): void {
   applyTheme();
 }
 
+// ─── Spreadsheet state ───────────────────────────────────────────────────────
+
+const ssApiRef  = ref<GridApi | null>(null);
+const ssRowData = ref(generateSpreadsheetData(200));
+const ssColDefs = SS_COLS as ColumnDef[];
+const ssOptions = { selectionUnit: 'cell' as const, getRowId: (d: any) => String(d.row) };
+
+const ssStats = reactive({
+  activeCell:    '\u2013',
+  range:         '\u2013',
+  selectedCount: 0,
+});
+
+function onSsGridReady(api: GridApi): void {
+  ssApiRef.value = api;
+}
+
+function onSsSelectionChanged(e: any): void {
+  ssStats.activeCell    = formatCoord(e.focusedCell);
+  ssStats.range         = formatRange(e.selectedRanges ?? []);
+  ssStats.selectedCount = countCellsInRanges(e.selectedRanges ?? []);
+}
+
+function onSsActiveCellChanged(e: any): void {
+  ssStats.activeCell = formatCoord(e.cell);
+}
+
+function ssClearSelection(): void {
+  ssApiRef.value?.deselectAll();
+  ssStats.activeCell    = '\u2013';
+  ssStats.range         = '\u2013';
+  ssStats.selectedCount = 0;
+}
+
 // ─── Lifecycle ────────────────────────────────────────────────────────────────
 
 onMounted(() => {
@@ -272,7 +313,10 @@ onMounted(() => {
   <!-- ── Top bar ──────────────────────────────────────────────────────────── -->
   <div class="demo-bar">
     <h1>&#9889; Ultimate Data Grid</h1>
-    <span>Vue wrapper demo</span>
+    <nav class="demo-nav">
+      <a class="demo-nav-tab" :class="{active: page === 'datagrid'}" href="#" @click.prevent="showPage('datagrid')">Data Grid</a>
+      <a class="demo-nav-tab" :class="{active: page === 'spreadsheet'}" href="#" @click.prevent="showPage('spreadsheet')">Spreadsheet</a>
+    </nav>
     <span class="demo-badge">Vue 3</span>
     <div class="demo-controls">
       <button
@@ -286,46 +330,71 @@ onMounted(() => {
     </div>
   </div>
 
-  <!-- ── Stats bar ─────────────────────────────────────────────────────────── -->
-  <div class="demo-stats">
-    <span class="stat-item">
-      Showing <strong id="stat-showing">{{ stats.showing }}</strong> of <strong>{{ stats.total }}</strong> rows
-    </span>
-    <span class="stat-item">
-      Columns: <strong>{{ stats.cols }}</strong>
-    </span>
-    <span class="stat-item">
-      Sort: <strong>{{ stats.sort }}</strong>
-      <button v-if="stats.hasSort" class="stat-clear" title="Clear sort" @click="clearSort">✕</button>
-    </span>
-    <span class="stat-item">
-      Selected: <strong>{{ stats.selected }}</strong>
-      <button v-if="stats.selected > 0" class="stat-clear" title="Clear selection" @click="clearSelection">✕</button>
-    </span>
-    <span v-if="stats.filterText" class="stat-item stat-item--filter active">
-      <em class="stat-filter-icon">⊿</em>
-      <span>{{ stats.filterText }}</span>
-      <button class="stat-clear" title="Clear filters" @click="clearFilters">✕</button>
-    </span>
-    <span class="stat-actions">
-      <button @click="addRow">+ Add Row</button>
-      <button @click="removeSelected" :disabled="stats.selected === 0">Remove Selected</button>
-    </span>
+  <!-- ══════════ PAGE: Data Grid ══════════ -->
+  <div v-show="page === 'datagrid'" class="demo-page">
+    <div class="demo-stats">
+      <span class="stat-item">
+        Showing <strong id="stat-showing">{{ stats.showing }}</strong> of <strong>{{ stats.total }}</strong> rows
+      </span>
+      <span class="stat-item">
+        Columns: <strong>{{ stats.cols }}</strong>
+      </span>
+      <span class="stat-item">
+        Sort: <strong>{{ stats.sort }}</strong>
+        <button v-if="stats.hasSort" class="stat-clear" title="Clear sort" @click="clearSort">✕</button>
+      </span>
+      <span class="stat-item">
+        Selected: <strong>{{ stats.selected }}</strong>
+        <button v-if="stats.selected > 0" class="stat-clear" title="Clear selection" @click="clearSelection">✕</button>
+      </span>
+      <span v-if="stats.filterText" class="stat-item stat-item--filter active">
+        <em class="stat-filter-icon">⊿</em>
+        <span>{{ stats.filterText }}</span>
+        <button class="stat-clear" title="Clear filters" @click="clearFilters">✕</button>
+      </span>
+      <span class="stat-actions">
+        <button @click="addRow">+ Add Row</button>
+        <button @click="removeSelected" :disabled="stats.selected === 0">Remove Selected</button>
+      </span>
+    </div>
+    <div class="demo-grid-wrap">
+      <UltimateGrid
+        :column-defs="COLUMN_DEFS"
+        :row-data="rowData"
+        selection-mode="multi"
+        :row-height="36"
+        :cell-renderer="employeeCellRenderer"
+        @grid-ready="onGridReady"
+        @sort-changed="onSortChanged"
+        @filter-changed="onFilterChanged"
+        @selection-changed="onSelectionChanged"
+      />
+    </div>
   </div>
 
-  <!-- ── Grid ──────────────────────────────────────────────────────────────── -->
-  <div class="demo-grid-wrap">
-    <UltimateGrid
-      :column-defs="COLUMN_DEFS"
-      :row-data="rowData"
-      selection-mode="multi"
-      :row-height="36"
-      :cell-renderer="employeeCellRenderer"
-      @grid-ready="onGridReady"
-      @sort-changed="onSortChanged"
-      @filter-changed="onFilterChanged"
-      @selection-changed="onSelectionChanged"
-    />
+  <!-- ══════════ PAGE: Spreadsheet ══════════ -->
+  <div v-show="page === 'spreadsheet'" class="demo-page">
+    <div class="demo-stats">
+      <span class="stat-item">Active cell: <strong>{{ ssStats.activeCell }}</strong></span>
+      <span class="stat-item">Range: <strong>{{ ssStats.range }}</strong></span>
+      <span class="stat-item">Selected cells: <strong>{{ ssStats.selectedCount }}</strong></span>
+      <span class="stat-actions">
+        <button @click="ssClearSelection">Clear Selection</button>
+      </span>
+    </div>
+    <div class="demo-grid-wrap">
+      <UltimateGrid
+        :column-defs="ssColDefs"
+        :row-data="ssRowData"
+        selection-mode="multi"
+        :row-height="28"
+        :cell-renderer="spreadsheetCellRenderer"
+        :options="ssOptions"
+        @grid-ready="onSsGridReady"
+        @selection-changed="onSsSelectionChanged"
+        @active-cell-changed="onSsActiveCellChanged"
+      />
+    </div>
   </div>
 
   <!-- ── Help modal ─────────────────────────────────────────────────────────── -->

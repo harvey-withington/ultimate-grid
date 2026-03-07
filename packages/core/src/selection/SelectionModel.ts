@@ -9,6 +9,11 @@ import type {
   RowModel,
 } from '../types';
 
+/** Minimal column accessor — avoids coupling to the full generic ColumnModel<TData>. */
+interface ColumnAccessor {
+  readonly visible: ReadonlyArray<{ readonly colId: string; readonly def: { rowHeader?: boolean } }>;
+}
+
 /**
  * SelectionModel
  *
@@ -45,6 +50,7 @@ export class SelectionModel implements ISelectionModel {
     private readonly _rowModel: RowModel,
     mode: SelectionMode = 'multi',
     unit: SelectionUnit = 'row',
+    private readonly _colModel?: ColumnAccessor,
   ) {
     this.mode = mode;
     this.unit = unit;
@@ -192,45 +198,322 @@ export class SelectionModel implements ISelectionModel {
     return this._dragAnchorIndex !== null;
   }
 
-  // ─── Cell selection (stubs — full impl when unit=cell is needed) ───────────
+  // ─── Cell selection ──────────────────────────────────────────────────────
 
-  selectCell(coord: CellCoord, _extend = false): void {
+  /**
+   * Select a single cell. Sets both anchor and focused cell.
+   * When extend=true (Ctrl+click), adds a new single-cell range.
+   * When extend=false, replaces all cell ranges.
+   */
+  selectCell(coord: CellCoord, extend = false): void {
+    if (this.mode === 'none') return;
+    const prev = this._focusedCell;
     this._focusedCell = coord;
     this._anchorCell = coord;
+
+    if (!extend || this.mode === 'single') {
+      this.selectedRanges.splice(0, this.selectedRanges.length, { start: coord, end: coord });
+    } else {
+      this.selectedRanges.push({ start: coord, end: coord });
+    }
+
+    // In cell unit mode, also track the row as selected for backward compat
+    if (this.unit === 'cell') {
+      if (!extend) this.selectedRowIds.clear();
+      this.selectedRowIds.add(coord.rowId);
+    }
+
+    this._emitActiveCellChanged(prev);
+    this._emit();
   }
 
+  /**
+   * Select a rectangular cell range from start (anchor) to end (focus).
+   * Replaces the last range in the array (Shift+click / Shift+arrow behaviour).
+   */
   selectRange(start: CellCoord, end: CellCoord): void {
+    if (this.mode === 'none') return;
+    const prev = this._focusedCell;
     this._anchorCell = start;
     this._focusedCell = end;
-    this.selectedRanges.splice(0, this.selectedRanges.length, { start, end });
+
+    // Replace the last range (the "active" range) while keeping any Ctrl-added ranges
+    if (this.selectedRanges.length > 0) {
+      this.selectedRanges[this.selectedRanges.length - 1] = { start, end };
+    } else {
+      this.selectedRanges.push({ start, end });
+    }
+
+    this._emitActiveCellChanged(prev);
+    this._emit();
   }
 
-  isCellSelected(_coord: CellCoord): boolean { return false; }
-  isCellInRange(_coord: CellCoord): boolean { return false; }
+  /**
+   * Check if a cell is the focused (active) cell.
+   */
+  isCellSelected(coord: CellCoord): boolean {
+    return this._focusedCell !== null
+      && this._focusedCell.rowId === coord.rowId
+      && this._focusedCell.colId === coord.colId;
+  }
+
+  /**
+   * Check if a cell falls within any selected range.
+   * Resolves row/col positions via the row model and column model.
+   */
+  isCellInRange(coord: CellCoord): boolean {
+    if (this.selectedRanges.length === 0) return false;
+    const pos = this._toCellDisplayPos(coord);
+    if (!pos) return false;
+
+    for (const range of this.selectedRanges) {
+      const s = this._toCellDisplayPos(range.start);
+      const e = this._toCellDisplayPos(range.end);
+      if (!s || !e) continue;
+
+      const minRow = Math.min(s.row, e.row);
+      const maxRow = Math.max(s.row, e.row);
+      const minCol = Math.min(s.col, e.col);
+      const maxCol = Math.max(s.col, e.col);
+
+      if (pos.row >= minRow && pos.row <= maxRow && pos.col >= minCol && pos.col <= maxCol) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   setFocus(coord: CellCoord): void {
+    const prev = this._focusedCell;
     this._focusedCell = coord;
+    this._emitActiveCellChanged(prev);
   }
 
-  moveFocus(direction: Direction): void {
-    if (!this._focusedCell) return;
-    // Keyboard nav — renderer wires this to arrow keys
-    const rows = this._rowModel.displayRows;
-    const curRow = rows.findIndex((r) => r.rowId === this._focusedCell!.rowId);
-    if (curRow === -1) return;
+  /**
+   * Select an entire row as a cell range spanning all visible columns.
+   */
+  selectEntireRow(rowId: string, extend = false): void {
+    if (this.mode === 'none') return;
+    const cols = this._colModel?.visible;
+    if (!cols || cols.length === 0) return;
+    const firstCol = cols[0].colId;
+    const lastCol  = cols[cols.length - 1].colId;
+    const start: CellCoord = { rowId, colId: firstCol };
+    const end:   CellCoord = { rowId, colId: lastCol };
 
-    // For simplicity, we just navigate up/down rows for now, unless columnModel is added to selectionModel
-    // If column navigation is needed, SelectionModel would need a reference to ColumnModel
-    // to find adjacent columns. For now, we will handle row-level navigation.
-    let nextIndex = curRow;
-    if (direction === 'up')   nextIndex = Math.max(0, curRow - 1);
-    if (direction === 'down') nextIndex = Math.min(rows.length - 1, curRow + 1);
+    // Focus the first non-rowHeader column (so active cell shows a valid reference)
+    const focusCol = cols.find(c => !c.def?.rowHeader) ?? cols[0];
+    const focusCoord: CellCoord = { rowId, colId: focusCol.colId };
 
-    const nextRow = rows[nextIndex];
-    if (nextRow) {
-      this._focusedCell = { rowId: nextRow.rowId, colId: this._focusedCell.colId };
-      this.selectRow(nextRow.rowId);
+    const prev = this._focusedCell;
+    this._focusedCell = focusCoord;
+    this._anchorCell  = focusCoord;
+
+    if (!extend || this.mode === 'single') {
+      this.selectedRanges.splice(0, this.selectedRanges.length, { start, end });
+    } else {
+      this.selectedRanges.push({ start, end });
     }
+
+    this.selectedRowIds.add(rowId);
+    this._emitActiveCellChanged(prev);
+    this._emit();
+  }
+
+  /**
+   * Select an entire column as a cell range spanning all visible rows.
+   */
+  selectEntireColumn(colId: string, extend = false): void {
+    if (this.mode === 'none') return;
+    const rows = this._rowModel.displayRows;
+    if (rows.length === 0) return;
+    const firstRowId = rows[0].rowId;
+    const lastRowId  = rows[rows.length - 1].rowId;
+    const start: CellCoord = { rowId: firstRowId, colId };
+    const end:   CellCoord = { rowId: lastRowId,  colId };
+
+    const prev = this._focusedCell;
+    this._focusedCell = start;
+    this._anchorCell  = start;
+
+    if (!extend || this.mode === 'single') {
+      this.selectedRanges.splice(0, this.selectedRanges.length, { start, end });
+      this.selectedRowIds.clear();
+    } else {
+      this.selectedRanges.push({ start, end });
+    }
+
+    // Mark all rows as selected for backward compat
+    for (const row of rows) {
+      this.selectedRowIds.add(row.rowId);
+    }
+
+    this._emitActiveCellChanged(prev);
+    this._emit();
+  }
+
+  /**
+   * Move the focused cell in the given direction.
+   * When extend=true (Shift held), the selection range extends from the anchor.
+   * Otherwise the anchor moves with the focus (single-cell selection).
+   */
+  moveFocus(direction: Direction, extend = false): void {
+    if (!this._focusedCell) return;
+    const next = this._adjacentCell(this._focusedCell, direction);
+    if (!next) return;
+
+    const prev = this._focusedCell;
+    this._focusedCell = next;
+
+    if (extend && this._anchorCell) {
+      // Extend the active range from anchor to new focus
+      this.selectRange(this._anchorCell, next);
+
+      // In row unit mode, also extend row selection from anchor to focus
+      if (this.unit === 'row') {
+        const rows = this._rowModel.displayRows;
+        const anchorIdx = rows.findIndex(r => r.rowId === this._anchorCell!.rowId);
+        const focusIdx  = rows.findIndex(r => r.rowId === next.rowId);
+        if (anchorIdx !== -1 && focusIdx !== -1) {
+          this.selectRowRange(anchorIdx, focusIdx);
+        }
+      }
+    } else {
+      // Move anchor with focus — single cell
+      this._anchorCell = next;
+      this.selectedRanges.splice(0, this.selectedRanges.length, { start: next, end: next });
+
+      // In row unit mode, also update row selection
+      if (this.unit === 'row') {
+        this.selectedRowIds.clear();
+        this.selectedRowIds.add(next.rowId);
+      } else {
+        this.selectedRowIds.clear();
+        this.selectedRowIds.add(next.rowId);
+      }
+
+      this._emitActiveCellChanged(prev);
+      this._emit();
+    }
+  }
+
+  /**
+   * Move the focused cell up or down by `count` rows.
+   * Behaves like moveFocus but jumps multiple rows (e.g. for PageUp/PageDown).
+   */
+  moveFocusVertical(count: number, extend = false): void {
+    if (!this._focusedCell) return;
+    const rows = this._rowModel.displayRows;
+    const curIdx = rows.findIndex(r => r.rowId === this._focusedCell!.rowId);
+    if (curIdx === -1) return;
+
+    const nextIdx = Math.max(0, Math.min(rows.length - 1, curIdx + count));
+    if (nextIdx === curIdx) return;
+
+    const next: CellCoord = { rowId: rows[nextIdx].rowId, colId: this._focusedCell.colId };
+    const prev = this._focusedCell;
+    this._focusedCell = next;
+
+    if (extend && this._anchorCell) {
+      this.selectRange(this._anchorCell, next);
+
+      if (this.unit === 'row') {
+        const anchorIdx = rows.findIndex(r => r.rowId === this._anchorCell!.rowId);
+        if (anchorIdx !== -1) {
+          this.selectRowRange(anchorIdx, nextIdx);
+        }
+      }
+    } else {
+      this._anchorCell = next;
+      this.selectedRanges.splice(0, this.selectedRanges.length, { start: next, end: next });
+
+      if (this.unit === 'row') {
+        this.selectedRowIds.clear();
+        this.selectedRowIds.add(next.rowId);
+      } else {
+        this.selectedRowIds.clear();
+        this.selectedRowIds.add(next.rowId);
+      }
+
+      this._emitActiveCellChanged(prev);
+      this._emit();
+    }
+  }
+
+  // ─── Range geometry queries ────────────────────────────────────────────────
+
+  /**
+   * For a cell that is in-range, returns which edges of the selection rectangle
+   * it sits on. Returns null if the cell is not in any range.
+   */
+  getCellRangeEdges(coord: CellCoord): { top: boolean; right: boolean; bottom: boolean; left: boolean } | null {
+    if (this.selectedRanges.length === 0) return null;
+    const pos = this._toCellDisplayPos(coord);
+    if (!pos) return null;
+
+    let inAnyRange = false;
+    let top = false, right = false, bottom = false, left = false;
+
+    for (const range of this.selectedRanges) {
+      const s = this._toCellDisplayPos(range.start);
+      const e = this._toCellDisplayPos(range.end);
+      if (!s || !e) continue;
+
+      const minRow = Math.min(s.row, e.row);
+      const maxRow = Math.max(s.row, e.row);
+      const minCol = Math.min(s.col, e.col);
+      const maxCol = Math.max(s.col, e.col);
+
+      if (pos.row >= minRow && pos.row <= maxRow && pos.col >= minCol && pos.col <= maxCol) {
+        inAnyRange = true;
+        if (pos.row === minRow) top    = true;
+        if (pos.row === maxRow) bottom = true;
+        if (pos.col === minCol) left   = true;
+        if (pos.col === maxCol) right  = true;
+      }
+    }
+    return inAnyRange ? { top, right, bottom, left } : null;
+  }
+
+  /**
+   * Returns true if the given column intersects any selected range.
+   */
+  isColumnInRange(colId: string): boolean {
+    if (this.selectedRanges.length === 0) return false;
+    const cols = this._colModel?.visible;
+    if (!cols) return false;
+    const colIdx = cols.findIndex((c) => c.colId === colId);
+    if (colIdx === -1) return false;
+
+    for (const range of this.selectedRanges) {
+      const s = this._toCellDisplayPos(range.start);
+      const e = this._toCellDisplayPos(range.end);
+      if (!s || !e) continue;
+      const minCol = Math.min(s.col, e.col);
+      const maxCol = Math.max(s.col, e.col);
+      if (colIdx >= minCol && colIdx <= maxCol) return true;
+    }
+    return false;
+  }
+
+  /**
+   * Returns true if the given row intersects any selected range.
+   */
+  isRowInRange(rowId: string): boolean {
+    if (this.selectedRanges.length === 0) return false;
+    const rows = this._rowModel.displayRows;
+    const rowIdx = rows.findIndex((r) => r.rowId === rowId);
+    if (rowIdx === -1) return false;
+
+    for (const range of this.selectedRanges) {
+      const s = this._toCellDisplayPos(range.start);
+      const e = this._toCellDisplayPos(range.end);
+      if (!s || !e) continue;
+      const minRow = Math.min(s.row, e.row);
+      const maxRow = Math.max(s.row, e.row);
+      if (rowIdx >= minRow && rowIdx <= maxRow) return true;
+    }
+    return false;
   }
 
   // ─── Internal ──────────────────────────────────────────────────────────────
@@ -240,6 +523,82 @@ export class SelectionModel implements ISelectionModel {
       type: 'selectionChanged',
       source: 'user',
       selectedRowIds: [...this.selectedRowIds],
+      focusedCell: this._focusedCell,
+      selectedRanges: [...this.selectedRanges],
     });
+  }
+
+  private _emitActiveCellChanged(previous: CellCoord | null): void {
+    if (
+      previous?.rowId === this._focusedCell?.rowId &&
+      previous?.colId === this._focusedCell?.colId
+    ) return;
+    this._bus.emit('activeCellChanged', {
+      type: 'activeCellChanged',
+      source: 'user',
+      cell: this._focusedCell,
+      previous,
+    });
+  }
+
+  /**
+   * Resolve a CellCoord to numeric display positions { row, col }.
+   * Returns null if the row or column can't be found.
+   */
+  private _toCellDisplayPos(coord: CellCoord): { row: number; col: number } | null {
+    const rows = this._rowModel.displayRows;
+    const rowIdx = rows.findIndex((r) => r.rowId === coord.rowId);
+    if (rowIdx === -1) return null;
+
+    const cols = this._colModel?.visible;
+    if (!cols) return null;
+    const colIdx = cols.findIndex((c) => c.colId === coord.colId);
+    if (colIdx === -1) return null;
+
+    return { row: rowIdx, col: colIdx };
+  }
+
+  /**
+   * Get the adjacent cell in the given direction.
+   * Returns null if at the boundary.
+   */
+  private _adjacentCell(from: CellCoord, direction: Direction): CellCoord | null {
+    const rows = this._rowModel.displayRows;
+    const curRowIdx = rows.findIndex((r) => r.rowId === from.rowId);
+    if (curRowIdx === -1) return null;
+
+    const cols = this._colModel?.visible;
+
+    if (direction === 'up') {
+      const nextIdx = Math.max(0, curRowIdx - 1);
+      const nextRow = rows[nextIdx];
+      return nextRow ? { rowId: nextRow.rowId, colId: from.colId } : null;
+    }
+    if (direction === 'down') {
+      const nextIdx = Math.min(rows.length - 1, curRowIdx + 1);
+      const nextRow = rows[nextIdx];
+      return nextRow ? { rowId: nextRow.rowId, colId: from.colId } : null;
+    }
+
+    // Left / right require column model
+    if (!cols) return null;
+    const curColIdx = cols.findIndex((c) => c.colId === from.colId);
+    if (curColIdx === -1) return null;
+
+    if (direction === 'left') {
+      let nextIdx = curColIdx - 1;
+      // Skip row-header columns
+      while (nextIdx >= 0 && cols[nextIdx].def?.rowHeader) nextIdx--;
+      if (nextIdx < 0) return null;
+      return { rowId: from.rowId, colId: cols[nextIdx].colId };
+    }
+    if (direction === 'right') {
+      let nextIdx = curColIdx + 1;
+      while (nextIdx < cols.length && cols[nextIdx].def?.rowHeader) nextIdx++;
+      if (nextIdx >= cols.length) return null;
+      return { rowId: from.rowId, colId: cols[nextIdx].colId };
+    }
+
+    return null;
   }
 }

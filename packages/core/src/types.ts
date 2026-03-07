@@ -227,6 +227,8 @@ export interface ColumnDef<TData = unknown> {
   resizable?: boolean;
   lockPosition?: boolean;
   lockPinned?: boolean;
+  /** When true, this column acts as a row header (e.g. row numbers in spreadsheet mode). */
+  rowHeader?: boolean;
 }
 
 export interface Column<TData = unknown> {
@@ -314,7 +316,12 @@ export interface SelectionModel {
   isCellSelected(coord: CellCoord): boolean;
   isCellInRange(coord: CellCoord): boolean;
   setFocus(coord: CellCoord): void;
-  moveFocus(direction: Direction): void;
+  moveFocus(direction: Direction, extend?: boolean): void;
+  selectEntireRow(rowId: string, extend?: boolean): void;
+  selectEntireColumn(colId: string, extend?: boolean): void;
+  getCellRangeEdges(coord: CellCoord): { top: boolean; right: boolean; bottom: boolean; left: boolean } | null;
+  isColumnInRange(colId: string): boolean;
+  isRowInRange(rowId: string): boolean;
 }
 
 // ─── Edit Model ───────────────────────────────────────────────────────────────
@@ -390,7 +397,8 @@ export interface ViewportChangedEvent extends GridEvent { type: 'viewportChanged
 export interface CellClickedEvent extends GridEvent { type: 'cellClicked'; coord: CellCoord; rowNode: RowNode; event: MouseEvent; }
 export interface CellDoubleClickedEvent extends GridEvent { type: 'cellDoubleClicked'; coord: CellCoord; event: MouseEvent; }
 export interface CellKeyDownEvent extends GridEvent { type: 'cellKeyDown'; coord: CellCoord; event: KeyboardEvent; }
-export interface SelectionChangedEvent extends GridEvent { type: 'selectionChanged'; selectedRowIds: string[]; }
+export interface SelectionChangedEvent extends GridEvent { type: 'selectionChanged'; selectedRowIds: string[]; focusedCell: CellCoord | null; selectedRanges: CellRange[]; }
+export interface ActiveCellChangedEvent extends GridEvent { type: 'activeCellChanged'; cell: CellCoord | null; previous: CellCoord | null; }
 export interface SortChangedEvent extends GridEvent { type: 'sortChanged'; sortState: SortState[]; }
 export interface FilterChangedEvent extends GridEvent { type: 'filterChanged'; filterState: FilterState; }
 export interface ColumnResizedEvent extends GridEvent { type: 'columnResized'; colId: string; width: number; finished: boolean; }
@@ -407,6 +415,7 @@ export interface GridEventMap {
   cellDoubleClicked: CellDoubleClickedEvent;
   cellKeyDown: CellKeyDownEvent;
   selectionChanged: SelectionChangedEvent;
+  activeCellChanged: ActiveCellChangedEvent;
   sortChanged: SortChangedEvent;
   filterChanged: FilterChangedEvent;
   columnResized: ColumnResizedEvent;

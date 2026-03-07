@@ -55,6 +55,7 @@ const emit = defineEmits<{
   columnMoved:      [e: GridEventMap['columnMoved']];
   cellClicked:      [e: GridEventMap['cellClicked']];
   cellDoubleClicked:[e: GridEventMap['cellDoubleClicked']];
+  activeCellChanged: [e: GridEventMap['activeCellChanged']];
 }>();
 
 // ─── Internal state ────────────────────────────────────────────────────────────
@@ -96,6 +97,7 @@ function mountGrid(): void {
     api.on('columnMoved',       e => emit('columnMoved',      e)),
     api.on('cellClicked',       e => emit('cellClicked',      e)),
     api.on('cellDoubleClicked', e => emit('cellDoubleClicked',e)),
+    api.on('activeCellChanged',  e => emit('activeCellChanged', e)),
   );
 
   emit('gridReady', api);

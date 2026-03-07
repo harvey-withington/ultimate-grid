@@ -43,7 +43,10 @@
   <!-- ── Top bar ──────────────────────────────────────────────────────────── -->
   <div class="demo-bar">
     <h1>⚡ Ultimate Data Grid</h1>
-    <span>AngularJS wrapper demo</span>
+    <nav class="demo-nav">
+      <a class="demo-nav-tab" ng-class="{active: vm.page === 'datagrid'}" href="" ng-click="vm.showPage('datagrid'); $event.preventDefault()">Data Grid</a>
+      <a class="demo-nav-tab" ng-class="{active: vm.page === 'spreadsheet'}" href="" ng-click="vm.showPage('spreadsheet'); $event.preventDefault()">Spreadsheet</a>
+    </nav>
     <span class="demo-badge">AngularJS 1.8</span>
 
     <div class="demo-controls">
@@ -52,38 +55,64 @@
     </div>
   </div>
 
-  <!-- ── Stats bar ────────────────────────────────────────────────────────── -->
-  <div class="demo-stats">
-    <span class="stat-item">Showing <strong>{{vm.stats.showing}}</strong> of <strong>{{vm.stats.total}}</strong> rows</span>
-    <span class="stat-item">Columns: <strong>{{vm.stats.cols}}</strong></span>
-    <span class="stat-item">
-      Sort: <strong>{{vm.stats.sort}}</strong>
-      <button class="stat-clear" ng-show="vm.stats.hasSort" ng-click="vm.clearSort()" title="Clear sort">✕</button>
-    </span>
-    <span class="stat-item">
-      Selected: <strong>{{vm.stats.selected}}</strong>
-      <button class="stat-clear" ng-show="vm.stats.selected > 0" ng-click="vm.clearSelection()" title="Clear selection">✕</button>
-    </span>
-    <span class="stat-item" ng-show="vm.stats.filterText">
-      <i class="stat-filter-icon">⊟</i><strong>{{vm.stats.filterText}}</strong>
-      <button class="stat-clear" ng-click="vm.clearFilters()" title="Clear filters">✕</button>
-    </span>
-    <span class="stat-actions">
-      <button ng-click="vm.addRow()">+ Add Row</button>
-      <button ng-click="vm.removeSelected()" ng-disabled="vm.stats.selected === 0">Remove Selected</button>
-    </span>
+  <!-- ══════════════════════════════════════════════════════════════════════
+       PAGE: Data Grid
+       ══════════════════════════════════════════════════════════════════════ -->
+  <div class="demo-page" ng-show="vm.page === 'datagrid'">
+    <div class="demo-stats">
+      <span class="stat-item">Showing <strong>{{vm.stats.showing}}</strong> of <strong>{{vm.stats.total}}</strong> rows</span>
+      <span class="stat-item">Columns: <strong>{{vm.stats.cols}}</strong></span>
+      <span class="stat-item">
+        Sort: <strong>{{vm.stats.sort}}</strong>
+        <button class="stat-clear" ng-show="vm.stats.hasSort" ng-click="vm.clearSort()" title="Clear sort">✕</button>
+      </span>
+      <span class="stat-item">
+        Selected: <strong>{{vm.stats.selected}}</strong>
+        <button class="stat-clear" ng-show="vm.stats.selected > 0" ng-click="vm.clearSelection()" title="Clear selection">✕</button>
+      </span>
+      <span class="stat-item" ng-show="vm.stats.filterText">
+        <i class="stat-filter-icon">⊟</i><strong>{{vm.stats.filterText}}</strong>
+        <button class="stat-clear" ng-click="vm.clearFilters()" title="Clear filters">✕</button>
+      </span>
+      <span class="stat-actions">
+        <button ng-click="vm.addRow()">+ Add Row</button>
+        <button ng-click="vm.removeSelected()" ng-disabled="vm.stats.selected === 0">Remove Selected</button>
+      </span>
+    </div>
+    <div class="demo-grid-wrap">
+      <ultimate-grid
+        column-defs="vm.columnDefs"
+        row-data="vm.rowData"
+        options="vm.gridOptions"
+        selection-mode="multi"
+        on-grid-ready="vm.onGridReady(api)"
+        api="vm.gridApi">
+      </ultimate-grid>
+    </div>
   </div>
 
-  <!-- ── Grid ──────────────────────────────────────────────────────────────── -->
-  <div class="demo-grid-wrap">
-    <ultimate-grid
-      column-defs="vm.columnDefs"
-      row-data="vm.rowData"
-      options="vm.gridOptions"
-      selection-mode="multi"
-      on-grid-ready="vm.onGridReady(api)"
-      api="vm.gridApi">
-    </ultimate-grid>
+  <!-- ══════════════════════════════════════════════════════════════════════
+       PAGE: Spreadsheet Mode
+       ══════════════════════════════════════════════════════════════════════ -->
+  <div class="demo-page" ng-show="vm.page === 'spreadsheet'">
+    <div class="demo-stats">
+      <span class="stat-item">Active cell: <strong>{{vm.ssStats.activeCell}}</strong></span>
+      <span class="stat-item">Range: <strong>{{vm.ssStats.range}}</strong></span>
+      <span class="stat-item">Selected cells: <strong>{{vm.ssStats.selectedCount}}</strong></span>
+      <span class="stat-actions">
+        <button ng-click="vm.ssClearSelection()">Clear Selection</button>
+      </span>
+    </div>
+    <div class="demo-grid-wrap">
+      <ultimate-grid
+        column-defs="vm.ssColumnDefs"
+        row-data="vm.ssRowData"
+        options="vm.ssGridOptions"
+        selection-mode="multi"
+        on-grid-ready="vm.onSsGridReady(api)"
+        api="vm.ssGridApi">
+      </ultimate-grid>
+    </div>
   </div>
 
   <!-- ── Help modal ───────────────────────────────────────────────────────────── -->

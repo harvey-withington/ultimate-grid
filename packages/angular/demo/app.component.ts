@@ -33,6 +33,7 @@ import type {
   Column,
   RowNode,
 } from '../../core/src/types.ts';
+import { generateSpreadsheetData, SS_COLS, spreadsheetCellRenderer, formatCoord, formatRange, countCellsInRanges } from '../../core/demo/spreadsheet-data.ts';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -167,10 +168,13 @@ function buildFilterSummary(filterState: FilterState): string {
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <!-- ── Top bar ──────────────────────────────────────────────────────── -->
+    <!-- ── Top bar ────────────────────────────────────────────────────── -->
     <div class="demo-bar">
       <h1>&#9889; Ultimate Data Grid</h1>
-      <span>Angular wrapper demo</span>
+      <nav class="demo-nav">
+        <a class="demo-nav-tab" [class.active]="page === 'datagrid'" href="#" (click)="showPage('datagrid'); $event.preventDefault()">Data Grid</a>
+        <a class="demo-nav-tab" [class.active]="page === 'spreadsheet'" href="#" (click)="showPage('spreadsheet'); $event.preventDefault()">Spreadsheet</a>
+      </nav>
       <span class="demo-badge">Angular 17</span>
       <div class="demo-controls">
         <button
@@ -182,46 +186,71 @@ function buildFilterSummary(filterState: FilterState): string {
       </div>
     </div>
 
-    <!-- ── Stats bar ─────────────────────────────────────────────────────── -->
-    <div class="demo-stats">
-      <span class="stat-item">
-        Showing <strong id="stat-showing">{{ statShowing }}</strong> of <strong>{{ statTotal }}</strong> rows
-      </span>
-      <span class="stat-item">
-        Columns: <strong>{{ statCols }}</strong>
-      </span>
-      <span class="stat-item">
-        Sort: <strong>{{ statSort }}</strong>
-        <button *ngIf="statHasSort" class="stat-clear" title="Clear sort" (click)="clearSort()">✕</button>
-      </span>
-      <span class="stat-item">
-        Selected: <strong>{{ statSelected }}</strong>
-        <button *ngIf="statSelected > 0" class="stat-clear" title="Clear selection" (click)="clearSelection()">✕</button>
-      </span>
-      <span *ngIf="statFilterText" class="stat-item stat-item--filter active">
-        <em class="stat-filter-icon">⊿</em>
-        <span>{{ statFilterText }}</span>
-        <button class="stat-clear" title="Clear filters" (click)="clearFilters()">✕</button>
-      </span>
-      <span class="stat-actions">
-        <button (click)="addRow()">+ Add Row</button>
-        <button (click)="removeSelected()" [disabled]="statSelected === 0">Remove Selected</button>
-      </span>
+    <!-- ══════════ PAGE: Data Grid ══════════ -->
+    <div class="demo-page" *ngIf="page === 'datagrid'">
+      <div class="demo-stats">
+        <span class="stat-item">
+          Showing <strong id="stat-showing">{{ statShowing }}</strong> of <strong>{{ statTotal }}</strong> rows
+        </span>
+        <span class="stat-item">
+          Columns: <strong>{{ statCols }}</strong>
+        </span>
+        <span class="stat-item">
+          Sort: <strong>{{ statSort }}</strong>
+          <button *ngIf="statHasSort" class="stat-clear" title="Clear sort" (click)="clearSort()">✕</button>
+        </span>
+        <span class="stat-item">
+          Selected: <strong>{{ statSelected }}</strong>
+          <button *ngIf="statSelected > 0" class="stat-clear" title="Clear selection" (click)="clearSelection()">✕</button>
+        </span>
+        <span *ngIf="statFilterText" class="stat-item stat-item--filter active">
+          <em class="stat-filter-icon">⊿</em>
+          <span>{{ statFilterText }}</span>
+          <button class="stat-clear" title="Clear filters" (click)="clearFilters()">✕</button>
+        </span>
+        <span class="stat-actions">
+          <button (click)="addRow()">+ Add Row</button>
+          <button (click)="removeSelected()" [disabled]="statSelected === 0">Remove Selected</button>
+        </span>
+      </div>
+      <div class="demo-grid-wrap">
+        <ultimate-grid
+          [columnDefs]="columnDefs"
+          [rowData]="rowData"
+          selectionMode="multi"
+          [rowHeight]="36"
+          [cellRenderer]="cellRenderer"
+          (gridReady)="onGridReady($event)"
+          (sortChanged)="onSortChanged($event)"
+          (filterChanged)="onFilterChanged($event)"
+          (selectionChanged)="onSelectionChanged()"
+        />
+      </div>
     </div>
 
-    <!-- ── Grid ──────────────────────────────────────────────────────────── -->
-    <div class="demo-grid-wrap">
-      <ultimate-grid
-        [columnDefs]="columnDefs"
-        [rowData]="rowData"
-        selectionMode="multi"
-        [rowHeight]="36"
-        [cellRenderer]="cellRenderer"
-        (gridReady)="onGridReady($event)"
-        (sortChanged)="onSortChanged($event)"
-        (filterChanged)="onFilterChanged($event)"
-        (selectionChanged)="onSelectionChanged()"
-      />
+    <!-- ══════════ PAGE: Spreadsheet ══════════ -->
+    <div class="demo-page" *ngIf="page === 'spreadsheet'">
+      <div class="demo-stats">
+        <span class="stat-item">Active cell: <strong>{{ ssActiveCell }}</strong></span>
+        <span class="stat-item">Range: <strong>{{ ssRange }}</strong></span>
+        <span class="stat-item">Selected cells: <strong>{{ ssSelectedCount }}</strong></span>
+        <span class="stat-actions">
+          <button (click)="ssClearSelection()">Clear Selection</button>
+        </span>
+      </div>
+      <div class="demo-grid-wrap">
+        <ultimate-grid
+          [columnDefs]="ssColumnDefs"
+          [rowData]="ssRowData"
+          selectionMode="multi"
+          [rowHeight]="28"
+          [cellRenderer]="ssCellRenderer"
+          [options]="ssOptions"
+          (gridReady)="onSsGridReady($event)"
+          (selectionChanged)="onSsSelectionChanged($event)"
+          (activeCellChanged)="onSsActiveCellChanged($event)"
+        />
+      </div>
     </div>
 
     <!-- ── Help modal ─────────────────────────────────────────────────────── -->
@@ -321,6 +350,7 @@ export class AppComponent implements OnInit, OnDestroy {
   readonly cellRenderer = employeeCellRenderer;
   rowData: Employee[] = generateData(2000);
 
+  page: 'datagrid' | 'spreadsheet' = 'datagrid';
   dark     = window.matchMedia('(prefers-color-scheme: dark)').matches;
   helpOpen = false;
 
@@ -331,6 +361,16 @@ export class AppComponent implements OnInit, OnDestroy {
   statHasSort    = false;
   statSelected   = 0;
   statFilterText = '';
+
+  // Spreadsheet state
+  readonly ssColumnDefs = SS_COLS as ColumnDef[];
+  readonly ssCellRenderer = spreadsheetCellRenderer;
+  ssRowData = generateSpreadsheetData(200);
+  readonly ssOptions = { selectionUnit: 'cell' as const, getRowId: (d: any) => String(d.row) };
+  ssActiveCell    = '\u2013';
+  ssRange         = '\u2013';
+  ssSelectedCount = 0;
+  private ssApi: GridApi | null = null;
 
   private cdr = inject(ChangeDetectorRef);
 
@@ -424,6 +464,37 @@ export class AppComponent implements OnInit, OnDestroy {
   toggleTheme(): void {
     this.dark = !this.dark;
     this.applyTheme();
+    this.cdr.markForCheck();
+  }
+
+  showPage(id: 'datagrid' | 'spreadsheet'): void {
+    this.page = id;
+    this.cdr.markForCheck();
+  }
+
+  // ─── Spreadsheet event handlers ─────────────────────────────────────────
+
+  onSsGridReady(api: GridApi): void {
+    this.ssApi = api;
+  }
+
+  onSsSelectionChanged(e: any): void {
+    this.ssActiveCell    = formatCoord(e.focusedCell);
+    this.ssRange         = formatRange(e.selectedRanges ?? []);
+    this.ssSelectedCount = countCellsInRanges(e.selectedRanges ?? []);
+    this.cdr.markForCheck();
+  }
+
+  onSsActiveCellChanged(e: any): void {
+    this.ssActiveCell = formatCoord(e.cell);
+    this.cdr.markForCheck();
+  }
+
+  ssClearSelection(): void {
+    this.ssApi?.deselectAll();
+    this.ssActiveCell    = '\u2013';
+    this.ssRange         = '\u2013';
+    this.ssSelectedCount = 0;
     this.cdr.markForCheck();
   }
 

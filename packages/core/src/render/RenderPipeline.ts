@@ -70,6 +70,11 @@ export class RenderPipeline<TData = unknown> {
   // (in which case dragStart already handled selection — suppress click)
   private _mouseDownOnRow = false;
 
+  // Cell-level drag state
+  private _cellDragAnchor: { rowId: string; colId: string } | null = null;
+  private _rowHeaderDragAnchor: string | null = null;   // rowId of drag start
+  private _colHeaderDragAnchor: string | null = null;   // colId of drag start
+
   // Sort state cache (for header indicators)
   private _sortState: SortState[] = [];
 
@@ -110,6 +115,7 @@ export class RenderPipeline<TData = unknown> {
     this._buildFilterRow();
     this._bindScroll();
     this._bindDragSelect();
+    this._bindKeyboard();
     this._subscribeEvents();
     if (typeof ResizeObserver !== 'undefined') {
       this._resizeObserver = new ResizeObserver(() => this._renderRows());
@@ -133,7 +139,7 @@ export class RenderPipeline<TData = unknown> {
 
   private _buildShell(): void {
     this._root = document.createElement('div');
-    this._root.className = 'ugrid';
+    this._root.className = this._selModel.unit === 'cell' ? 'ugrid ugrid--cell-mode' : 'ugrid';
 
     this._header = document.createElement('div');
     this._header.className = 'ugrid-header';
@@ -145,6 +151,7 @@ export class RenderPipeline<TData = unknown> {
 
     this._body = document.createElement('div');
     this._body.className = 'ugrid-body';
+    this._body.tabIndex = 0;
 
     this._spacer = document.createElement('div');
     this._spacer.className = 'ugrid-spacer';
@@ -179,7 +186,19 @@ export class RenderPipeline<TData = unknown> {
 
       cell.appendChild(label);
       cell.appendChild(sortIcon);
-      cell.addEventListener('click', (e) => this._onHeaderClick(col.colId, e.ctrlKey || e.metaKey));
+      cell.addEventListener('mousedown', (e) => {
+        if (this._selModel.unit === 'cell' && !(e.ctrlKey || e.metaKey)) {
+          this._selModel.selectEntireColumn(col.colId);
+          this._colHeaderDragAnchor = col.colId;
+          e.preventDefault();
+          return;
+        }
+      });
+      cell.addEventListener('click', (e) => {
+        // In cell mode, selection is handled by mousedown above
+        if (this._selModel.unit === 'cell' && !(e.ctrlKey || e.metaKey)) return;
+        this._onHeaderClick(col.colId, e.ctrlKey || e.metaKey);
+      });
       this._header.appendChild(cell);
     }
     this._refreshSortIndicators();
@@ -245,11 +264,74 @@ export class RenderPipeline<TData = unknown> {
       this._mouseDownOnRow = true;
       const idx    = Number(rowEl.dataset.displayIndex);
       const extend = e.ctrlKey || e.metaKey;
-      this._selModel.dragStart(idx, extend);
+
+      const cellEl = target.closest<HTMLElement>('.ugrid-cell');
+      const rowId  = rowEl.dataset.rowId!;
+      const colId  = cellEl?.dataset.colId ?? this._colModel.visible[0]?.colId;
+
+      if (this._selModel.unit === 'cell') {
+        // Check if click is on a rowHeader column → select entire row
+        const col = colId ? this._colModel.visible.find(c => c.colId === colId) : null;
+        if (col?.def.rowHeader) {
+          this._selModel.selectEntireRow(rowId, extend);
+          this._cellDragAnchor = null;
+          this._rowHeaderDragAnchor = rowId;
+        } else if (rowId && colId) {
+          const coord = { rowId, colId };
+          if (e.shiftKey && this._selModel.focusedCell) {
+            // Shift+click: range from current active cell to clicked cell
+            const anchor = this._selModel.focusedCell;
+            this._selModel.selectRange(anchor, coord);
+            this._selModel.setFocus(anchor);
+          } else {
+            this._selModel.selectCell(coord, extend);
+          }
+          this._cellDragAnchor = coord;
+        }
+      } else {
+        // Row-level drag
+        this._selModel.dragStart(idx, extend);
+        this._cellDragAnchor = null;
+        if (rowId && colId) {
+          this._selModel.setFocus({ rowId, colId });
+        }
+      }
+
       e.preventDefault(); // suppress text selection
+      this._body.focus();    // ensure body has focus for keyboard events
     });
 
     this._body.addEventListener('mousemove', (e) => {
+      // Row-header drag: extend entire-row selection
+      if (this._rowHeaderDragAnchor) {
+        const rowIdx = this._yToDisplayIndex(e.clientY);
+        if (rowIdx !== null) {
+          const row = this._rowModel.displayRows[rowIdx];
+          if (row) {
+            const cols = this._colModel.visible;
+            const focusCol = cols.find(c => !c.def.rowHeader) ?? cols[0];
+            const last  = cols[cols.length - 1]?.colId;
+            if (focusCol && last) {
+              this._selModel.selectRange(
+                { rowId: this._rowHeaderDragAnchor, colId: focusCol.colId },
+                { rowId: row.rowId, colId: last },
+              );
+              this._selModel.setFocus({ rowId: this._rowHeaderDragAnchor, colId: focusCol.colId });
+            }
+          }
+        }
+        return;
+      }
+      // Cell-level drag: extend selection range from anchor to current cell
+      if (this._cellDragAnchor) {
+        const coord = this._xyToCellCoord(e.clientX, e.clientY);
+        if (coord) {
+          this._selModel.selectRange(this._cellDragAnchor, coord);
+          this._selModel.setFocus(this._cellDragAnchor);
+        }
+        return;
+      }
+      // Row-level drag
       if (!this._selModel.isDragging) return;
       const idx = this._yToDisplayIndex(e.clientY);
       if (idx !== null) {
@@ -257,7 +339,30 @@ export class RenderPipeline<TData = unknown> {
       }
     });
 
+    // Column-header drag (window-level since mouse leaves the header element)
+    const onColHeaderDragMove = (e: MouseEvent) => {
+      if (!this._colHeaderDragAnchor) return;
+      const colId = this._xToColId(e.clientX);
+      if (colId) {
+        const rows = this._rowModel.displayRows;
+        const firstRow = rows[0]?.rowId;
+        const lastRow  = rows[rows.length - 1]?.rowId;
+        if (firstRow && lastRow) {
+          this._selModel.selectRange(
+            { rowId: firstRow, colId: this._colHeaderDragAnchor },
+            { rowId: lastRow,  colId },
+          );
+          this._selModel.setFocus({ rowId: firstRow, colId: this._colHeaderDragAnchor });
+        }
+      }
+    };
+    window.addEventListener('mousemove', onColHeaderDragMove);
+    this._unsubs.push(() => window.removeEventListener('mousemove', onColHeaderDragMove));
+
     const endDrag = () => {
+      this._cellDragAnchor = null;
+      this._rowHeaderDragAnchor = null;
+      this._colHeaderDragAnchor = null;
       this._selModel.dragEnd();
       setTimeout(() => { this._mouseDownOnRow = false; }, 0);
     };
@@ -292,12 +397,157 @@ export class RenderPipeline<TData = unknown> {
     });
   }
 
+  // ─── Keyboard navigation ──────────────────────────────────────────────────────
+
+  private _bindKeyboard(): void {
+    this._body.addEventListener('keydown', (e) => {
+      // Don't intercept keyboard when a filter input is focused
+      if ((e.target as HTMLElement).closest('.ugrid-filter-input-wrap')) return;
+
+      switch (e.key) {
+        case 'ArrowUp':
+          e.preventDefault();
+          this._selModel.moveFocus('up', e.shiftKey);
+          this._ensureFocusedCellVisible();
+          break;
+        case 'ArrowDown':
+          e.preventDefault();
+          this._selModel.moveFocus('down', e.shiftKey);
+          this._ensureFocusedCellVisible();
+          break;
+        case 'ArrowLeft':
+          e.preventDefault();
+          this._selModel.moveFocus('left', e.shiftKey);
+          this._ensureFocusedCellVisible();
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          this._selModel.moveFocus('right', e.shiftKey);
+          this._ensureFocusedCellVisible();
+          break;
+        case 'PageUp': {
+          e.preventDefault();
+          const pageRows = Math.max(1, Math.floor((this._body.clientHeight || 400) / this._opts.rowHeight) - 1);
+          this._selModel.moveFocusVertical(-pageRows, e.shiftKey);
+          this._ensureFocusedCellVisible();
+          break;
+        }
+        case 'PageDown': {
+          e.preventDefault();
+          const pageRows = Math.max(1, Math.floor((this._body.clientHeight || 400) / this._opts.rowHeight) - 1);
+          this._selModel.moveFocusVertical(pageRows, e.shiftKey);
+          this._ensureFocusedCellVisible();
+          break;
+        }
+        case 'Tab': {
+          e.preventDefault();
+          const dir = e.shiftKey ? 'left' : 'right';
+          this._selModel.moveFocus(dir);
+          this._ensureFocusedCellVisible();
+          break;
+        }
+        case 'Enter': {
+          e.preventDefault();
+          this._selModel.moveFocus('down');
+          this._ensureFocusedCellVisible();
+          break;
+        }
+        case 'a':
+          if (e.ctrlKey || e.metaKey) {
+            e.preventDefault();
+            this._selModel.selectAll();
+          }
+          break;
+        case 'Escape':
+          e.preventDefault();
+          this._selModel.deselectAll();
+          this._selModel.selectedRanges.splice(0, this._selModel.selectedRanges.length);
+          break;
+        case 'F2':
+          if (this._selModel.focusedCell) {
+            this._bus.emit('cellKeyDown', {
+              type: 'cellKeyDown',
+              source: 'user',
+              coord: this._selModel.focusedCell,
+              event: e,
+            });
+          }
+          break;
+        default:
+          break;
+      }
+    });
+  }
+
+  private _ensureFocusedCellVisible(): void {
+    const fc = this._selModel.focusedCell;
+    if (!fc) return;
+    const rows = this._rowModel.displayRows;
+    const rowIdx = rows.findIndex((r) => r.rowId === fc.rowId);
+    if (rowIdx === -1) return;
+    const rowH = this._opts.rowHeight;
+    const viewH = this._body.clientHeight || 400;
+    const rowTop = rowIdx * rowH;
+    const rowBot = rowTop + rowH;
+    if (rowTop < this._body.scrollTop) {
+      this._body.scrollTop = rowTop;
+    } else if (rowBot > this._body.scrollTop + viewH) {
+      this._body.scrollTop = rowBot - viewH;
+    }
+  }
+
   private _yToDisplayIndex(clientY: number): number | null {
     const rect  = this._body.getBoundingClientRect();
     const relY  = clientY - rect.top + this._scrollTop;
     const idx   = Math.floor(relY / this._opts.rowHeight);
     const count = this._rowModel.displayRowCount;
     return idx >= 0 && idx < count ? idx : null;
+  }
+
+  /** Resolve a clientX to a column ID using the header's position. */
+  private _xToColId(clientX: number): string | null {
+    const rect = this._header.getBoundingClientRect();
+    const relX = clientX - rect.left + this._header.scrollLeft;
+    const cols = this._colModel.visible;
+    let accum = 0;
+    for (const col of cols) {
+      accum += col.width;
+      if (relX < accum) return col.colId;
+    }
+    return cols.length > 0 ? cols[cols.length - 1].colId : null;
+  }
+
+  /** Resolve a mouse position to a cell coordinate { rowId, colId }. */
+  private _xyToCellCoord(clientX: number, clientY: number): { rowId: string; colId: string } | null {
+    // Row from Y
+    const rowIdx = this._yToDisplayIndex(clientY);
+    if (rowIdx === null) return null;
+    const row = this._rowModel.displayRows[rowIdx];
+    if (!row) return null;
+
+    // Column from X (skip row-header columns)
+    const rect = this._body.getBoundingClientRect();
+    const relX = clientX - rect.left + this._body.scrollLeft;
+    const cols = this._colModel.visible;
+    let accum = 0;
+    let lastDataCol: string | null = null;
+    for (const col of cols) {
+      accum += col.width;
+      if (!col.def.rowHeader) lastDataCol = col.colId;
+      if (relX < accum) {
+        // If landed on a row-header column, clamp to first data column
+        if (col.def.rowHeader) {
+          const first = cols.find(c => !c.def.rowHeader);
+          return first ? { rowId: row.rowId, colId: first.colId } : null;
+        }
+        return { rowId: row.rowId, colId: col.colId };
+      }
+    }
+    // Past last column — clamp to last data column
+    if (lastDataCol) {
+      return { rowId: row.rowId, colId: lastDataCol };
+    }
+    return null;
   }
 
   // ─── Event subscriptions ─────────────────────────────────────────────────────
@@ -330,6 +580,7 @@ export class RenderPipeline<TData = unknown> {
         this._renderRows();
       }),
       this._bus.on('selectionChanged', () => this._refreshSelectionClasses()),
+      this._bus.on('activeCellChanged', () => this._refreshSelectionClasses()),
       this._bus.on('columnResized',   () => { this._buildHeader(); this._buildFilterRow(); this._renderRows(); }),
       this._bus.on('columnMoved',     () => { this._buildHeader(); this._buildFilterRow(); this._renderRows(); }),
     );
@@ -373,10 +624,11 @@ export class RenderPipeline<TData = unknown> {
     const isSel = this._selModel.isRowSelected(node.rowId);
     const row   = document.createElement('div');
 
+    const showRowSel = isSel && this._selModel.unit !== 'cell';
     row.className = [
       'ugrid-row',
       displayIdx % 2 === 0 ? 'ugrid-row--even' : 'ugrid-row--odd',
-      isSel ? 'ugrid-row--selected' : '',
+      showRowSel ? 'ugrid-row--selected' : '',
     ].filter(Boolean).join(' ');
 
     row.style.height = `${rowH}px`;
@@ -386,6 +638,8 @@ export class RenderPipeline<TData = unknown> {
     row.addEventListener('click', (e) => {
       // dragStart on mousedown already handled selection — suppress redundant click
       if (this._mouseDownOnRow) { this._mouseDownOnRow = false; return; }
+      // In cell mode, row-level click selection is handled by cell mousedown
+      if (this._selModel.unit === 'cell') return;
       this._onRowClick(node.rowId, e);
     });
 
@@ -406,16 +660,19 @@ export class RenderPipeline<TData = unknown> {
     if (this._cellRenderer) {
       const custom = this._cellRenderer(col as Column, node as RowNode, value);
       if (custom) {
-        cell.className = 'ugrid-cell';
+        cell.className = col.def.rowHeader ? 'ugrid-cell ugrid-cell--row-header' : 'ugrid-cell';
         cell.appendChild(custom);
         this._maybeAppendFilterIcon(cell, col, value);
+        this._applyCellSelectionClasses(cell, node.rowId, col.colId);
         return cell;
       }
     }
 
     // Default rendering
     this._defaultCellRender(cell, col, value);
+    if (col.def.rowHeader) cell.classList.add('ugrid-cell--row-header');
     this._maybeAppendFilterIcon(cell, col, value);
+    this._applyCellSelectionClasses(cell, node.rowId, col.colId);
     return cell;
   }
 
@@ -492,12 +749,50 @@ export class RenderPipeline<TData = unknown> {
   }
 
   private _refreshSelectionClasses(): void {
+    const isCellMode = this._selModel.unit === 'cell';
     this._rowsEl.querySelectorAll<HTMLElement>('.ugrid-row').forEach((rowEl) => {
+      const rowId = rowEl.dataset.rowId!;
       rowEl.classList.toggle(
         'ugrid-row--selected',
-        this._selModel.isRowSelected(rowEl.dataset.rowId!),
+        !isCellMode && this._selModel.isRowSelected(rowId),
       );
+      // Refresh cell-level classes within each visible row
+      rowEl.querySelectorAll<HTMLElement>('.ugrid-cell').forEach((cellEl) => {
+        const colId = cellEl.dataset.colId!;
+        this._applyCellSelectionClasses(cellEl, rowId, colId);
+      });
     });
+
+    // Highlight column headers that intersect the selection
+    if (isCellMode) {
+      this._header.querySelectorAll<HTMLElement>('.ugrid-header-cell').forEach((hdr) => {
+        const colId = hdr.dataset.colId!;
+        hdr.classList.toggle('ugrid-header-cell--in-range', this._selModel.isColumnInRange(colId));
+      });
+    }
+  }
+
+  private _applyCellSelectionClasses(cell: HTMLElement, rowId: string, colId: string): void {
+    // Only apply cell-level selection classes when unit is 'cell'
+    if (this._selModel.unit !== 'cell') return;
+    const coord = { rowId, colId };
+    const focused = this._selModel.isCellSelected(coord);
+    const inRange = this._selModel.isCellInRange(coord);
+
+    // Row-header cells highlight when their row intersects ANY range
+    const col = this._colModel.visible.find(c => c.colId === colId);
+    const isRowHdr = !!col?.def.rowHeader;
+    const rowHdrHighlight = isRowHdr && this._selModel.isRowInRange(rowId);
+
+    cell.classList.toggle('ugrid-cell--focused', focused);
+    cell.classList.toggle('ugrid-cell--in-range', inRange || rowHdrHighlight);
+
+    // Range perimeter edges (only for actual in-range data cells, not row headers)
+    const edges = inRange && !isRowHdr ? this._selModel.getCellRangeEdges(coord) : null;
+    cell.classList.toggle('ugrid-cell--range-top',    !!edges?.top);
+    cell.classList.toggle('ugrid-cell--range-bottom', !!edges?.bottom);
+    cell.classList.toggle('ugrid-cell--range-left',   !!edges?.left);
+    cell.classList.toggle('ugrid-cell--range-right',  !!edges?.right);
   }
 
   // ─── Sort header ─────────────────────────────────────────────────────────────

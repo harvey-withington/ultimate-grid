@@ -89,6 +89,7 @@ function ultimateGridDirective() {
           'columnMoved',
           'cellClicked',
           'cellDoubleClicked',
+          'activeCellChanged',
         ];
 
         FORWARDED_EVENTS.forEach(function(evtName) {

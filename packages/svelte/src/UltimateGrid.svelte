@@ -49,6 +49,7 @@
   export let onColumnMoved:      ((e: GridEventMap['columnMoved'])      => void)        | undefined = undefined;
   export let onCellClicked:      ((e: GridEventMap['cellClicked'])      => void)        | undefined = undefined;
   export let onCellDoubleClicked:((e: GridEventMap['cellDoubleClicked'])=> void)        | undefined = undefined;
+  export let onActiveCellChanged: ((e: GridEventMap['activeCellChanged']) => void)        | undefined = undefined;
 
   // ─── Internal ───────────────────────────────────────────────────────────────
 
@@ -93,6 +94,7 @@
       gridApi.on('columnMoved',       e => onColumnMoved?.(e)),
       gridApi.on('cellClicked',       e => onCellClicked?.(e)),
       gridApi.on('cellDoubleClicked', e => onCellDoubleClicked?.(e)),
+      gridApi.on('activeCellChanged',  e => onActiveCellChanged?.(e)),
     );
 
     onGridReady?.(gridApi);

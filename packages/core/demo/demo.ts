@@ -3,6 +3,38 @@ import { applyTheme, openHelp, closeHelp } from './theme';
 import { createGrid } from '../src/createGrid';
 import type { Column, ColumnDef, RowNode, SortState, FilterState, GridApi } from '../src/types';
 
+// ─── Page router ──────────────────────────────────────────────────────────────
+
+const PAGES = ['datagrid', 'spreadsheet'] as const;
+type PageId = (typeof PAGES)[number];
+
+let _ssMounted = false;
+
+function showPage(id: PageId): void {
+  for (const p of PAGES) {
+    const el = document.getElementById(`page-${p}`);
+    if (el) el.style.display = p === id ? '' : 'none';
+  }
+  document.querySelectorAll('.demo-nav-tab').forEach((tab) => {
+    tab.classList.toggle('active', (tab as HTMLElement).dataset.page === id);
+  });
+
+  // Lazy-mount spreadsheet demo on first visit
+  if (id === 'spreadsheet' && !_ssMounted) {
+    _ssMounted = true;
+    import('./spreadsheet-demo').then((m) => m.mount());
+  }
+}
+
+function getPageFromHash(): PageId {
+  const hash = location.hash.replace('#', '') as PageId;
+  return PAGES.includes(hash) ? hash : 'datagrid';
+}
+
+window.addEventListener('hashchange', () => showPage(getPageFromHash()));
+// Defer initial routing until DOM is ready (script is type=module so body exists)
+showPage(getPageFromHash());
+
 // ─── Data ────────────────────────────────────────────────────────────────────
 
 interface Employee {
@@ -220,14 +252,23 @@ document.getElementById('btn-stat-clear-selection')!.addEventListener('click', (
 
 const btnTheme     = document.getElementById('btn-theme')!;
 const gridContainer = document.getElementById('grid-container')!;
+const ssContainer = document.getElementById('ss-grid-container')!;
 const prefersDark  = window.matchMedia('(prefers-color-scheme: dark)');
 
+function applyThemeAll(dark: boolean): void {
+  applyTheme(dark, document.body, gridContainer, btnTheme);
+  // Also apply to the spreadsheet grid container if it has a .ugrid child
+  ssContainer
+    ?.querySelector('.ugrid')
+    ?.classList.toggle('ugrid-theme-dark', dark);
+}
+
 let _isDark = prefersDark.matches;
-applyTheme(_isDark, document.body, gridContainer, btnTheme);
+applyThemeAll(_isDark);
 
 btnTheme.addEventListener('click', () => {
   _isDark = !_isDark;
-  applyTheme(_isDark, document.body, gridContainer, btnTheme);
+  applyThemeAll(_isDark);
 });
 
 // ─── Help modal ───────────────────────────────────────────────────────────────

@@ -46,6 +46,7 @@ export interface UltimateGridProps<TData = unknown> {
   onColumnMoved?:       (e: GridEventMap['columnMoved'])       => void;
   onCellClicked?:       (e: GridEventMap['cellClicked'])       => void;
   onCellDoubleClicked?: (e: GridEventMap['cellDoubleClicked']) => void;
+  onActiveCellChanged?:  (e: GridEventMap['activeCellChanged'])  => void;
   className?: string;
   style?: CSSProperties;
 }
@@ -71,6 +72,7 @@ export function UltimateGrid<TData = unknown>(
     onColumnMoved,
     onCellClicked,
     onCellDoubleClicked,
+    onActiveCellChanged,
     className,
     style,
   } = props;
@@ -90,6 +92,7 @@ export function UltimateGrid<TData = unknown>(
     onColumnMoved,
     onCellClicked,
     onCellDoubleClicked,
+    onActiveCellChanged,
   });
   useEffect(() => {
     cbRefs.current = {
@@ -102,6 +105,7 @@ export function UltimateGrid<TData = unknown>(
       onColumnMoved,
       onCellClicked,
       onCellDoubleClicked,
+      onActiveCellChanged,
     };
   });
 
@@ -142,6 +146,7 @@ export function UltimateGrid<TData = unknown>(
       api.on('columnMoved',      (e) => cbRefs.current.onColumnMoved?.(e)),
       api.on('cellClicked',      (e) => cbRefs.current.onCellClicked?.(e)),
       api.on('cellDoubleClicked',(e) => cbRefs.current.onCellDoubleClicked?.(e)),
+      api.on('activeCellChanged', (e) => cbRefs.current.onActiveCellChanged?.(e)),
     );
 
     cbRefs.current.onGridReady?.(api);
