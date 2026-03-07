@@ -17,7 +17,8 @@ import '../../core/demo/demo-shared.css';
 import { ref, reactive, computed, onMounted, onUnmounted } from 'vue';
 import UltimateGrid from '../src/UltimateGrid.vue';
 import type { GridApi, ColumnDef, SortState, FilterState, Column, RowNode } from '../../core/src/types.ts';
-import { generateSpreadsheetData, SS_COLS, spreadsheetCellRenderer, formatCoord, formatRange, countCellsInRanges } from '../../core/demo/spreadsheet-data.ts';
+import { generateSpreadsheetData, SS_COLS } from '../../core/demo/spreadsheet-data.ts';
+import { formatCellCoord, formatCellRange } from '../../core/src/cell/cellUtils.ts';
 import type { SpreadsheetRow } from '../../core/demo/spreadsheet-data.ts';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -282,14 +283,18 @@ function onSsGridReady(api: GridApi): void {
   ssApiRef.value = api;
 }
 
-function onSsSelectionChanged(e: any): void {
-  ssStats.activeCell    = formatCoord(e.focusedCell);
-  ssStats.range         = formatRange(e.selectedRanges ?? []);
-  ssStats.selectedCount = countCellsInRanges(e.selectedRanges ?? []);
+function onSsSelectionChanged(): void {
+  const api = ssApiRef.value;
+  if (!api) return;
+  ssStats.activeCell    = formatCellCoord(api.getActiveCell(), SS_COLS);
+  ssStats.range         = formatCellRange(api.getSelectedRanges(), SS_COLS);
+  ssStats.selectedCount = api.getSelectedCellCount();
 }
 
-function onSsActiveCellChanged(e: any): void {
-  ssStats.activeCell = formatCoord(e.cell);
+function onSsActiveCellChanged(): void {
+  const api = ssApiRef.value;
+  if (!api) return;
+  ssStats.activeCell = formatCellCoord(api.getActiveCell(), SS_COLS);
 }
 
 function ssClearSelection(): void {
@@ -388,7 +393,7 @@ onMounted(() => {
         :row-data="ssRowData"
         selection-mode="multi"
         :row-height="28"
-        :cell-renderer="spreadsheetCellRenderer"
+        cell-renderer="spreadsheet"
         :options="ssOptions"
         @grid-ready="onSsGridReady"
         @selection-changed="onSsSelectionChanged"

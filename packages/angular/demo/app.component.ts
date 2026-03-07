@@ -33,7 +33,8 @@ import type {
   Column,
   RowNode,
 } from '../../core/src/types.ts';
-import { generateSpreadsheetData, SS_COLS, spreadsheetCellRenderer, formatCoord, formatRange, countCellsInRanges } from '../../core/demo/spreadsheet-data.ts';
+import { generateSpreadsheetData, SS_COLS } from '../../core/demo/spreadsheet-data.ts';
+import { formatCellCoord, formatCellRange } from '../../core/src/cell/cellUtils.ts';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -244,7 +245,7 @@ function buildFilterSummary(filterState: FilterState): string {
           [rowData]="ssRowData"
           selectionMode="multi"
           [rowHeight]="28"
-          [cellRenderer]="ssCellRenderer"
+          cellRenderer="spreadsheet"
           [options]="ssOptions"
           (gridReady)="onSsGridReady($event)"
           (selectionChanged)="onSsSelectionChanged($event)"
@@ -364,7 +365,6 @@ export class AppComponent implements OnInit, OnDestroy {
 
   // Spreadsheet state
   readonly ssColumnDefs = SS_COLS as ColumnDef[];
-  readonly ssCellRenderer = spreadsheetCellRenderer;
   ssRowData = generateSpreadsheetData(200);
   readonly ssOptions = { selectionUnit: 'cell' as const, getRowId: (d: any) => String(d.row) };
   ssActiveCell    = '\u2013';
@@ -478,15 +478,17 @@ export class AppComponent implements OnInit, OnDestroy {
     this.ssApi = api;
   }
 
-  onSsSelectionChanged(e: any): void {
-    this.ssActiveCell    = formatCoord(e.focusedCell);
-    this.ssRange         = formatRange(e.selectedRanges ?? []);
-    this.ssSelectedCount = countCellsInRanges(e.selectedRanges ?? []);
+  onSsSelectionChanged(): void {
+    if (!this.ssApi) return;
+    this.ssActiveCell    = formatCellCoord(this.ssApi.getActiveCell(), SS_COLS);
+    this.ssRange         = formatCellRange(this.ssApi.getSelectedRanges(), SS_COLS);
+    this.ssSelectedCount = this.ssApi.getSelectedCellCount();
     this.cdr.markForCheck();
   }
 
-  onSsActiveCellChanged(e: any): void {
-    this.ssActiveCell = formatCoord(e.cell);
+  onSsActiveCellChanged(): void {
+    if (!this.ssApi) return;
+    this.ssActiveCell = formatCellCoord(this.ssApi.getActiveCell(), SS_COLS);
     this.cdr.markForCheck();
   }
 

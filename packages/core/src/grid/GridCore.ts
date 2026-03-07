@@ -9,6 +9,7 @@ import type {
   SortState,
   FilterState,
   CellCoord,
+  CellRange,
   GridEventMap,
   SelectionModel,
   Viewport,
@@ -155,6 +156,9 @@ export class GridCore<TData = unknown> {
       deselectAll() { self._bus.emit('selectionChanged', { type: 'selectionChanged', source: 'api', selectedRowIds: [], focusedCell: null, selectedRanges: [] }); },
       getSelectedRowIds(): string[] { return []; },
       getSelectedRows(): TData[] { return []; },
+      getActiveCell(): CellCoord | null { return null; },
+      getSelectedRanges(): CellRange[] { return []; },
+      getSelectedCellCount(): number { return 0; },
 
       // ── Sort ──
       setSortModel(sort: SortState[]) {

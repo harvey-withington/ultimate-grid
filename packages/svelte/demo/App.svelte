@@ -17,7 +17,8 @@
   import { onMount, onDestroy } from 'svelte';
   import UltimateGrid from '../src/UltimateGrid.svelte';
   import type { GridApi, ColumnDef, SortState, FilterState, Column, RowNode } from '../../core/src/types.ts';
-  import { generateSpreadsheetData, SS_COLS, spreadsheetCellRenderer, formatCoord, formatRange, countCellsInRanges } from '../../core/demo/spreadsheet-data.ts';
+  import { generateSpreadsheetData, SS_COLS } from '../../core/demo/spreadsheet-data.ts';
+  import { formatCellCoord, formatCellRange } from '../../core/src/cell/cellUtils.ts';
 
   // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -275,14 +276,16 @@
     ssApiRef = api;
   }
 
-  function onSsSelectionChanged(e: any): void {
-    ssActiveCell    = formatCoord(e.focusedCell);
-    ssRange         = formatRange(e.selectedRanges ?? []);
-    ssSelectedCount = countCellsInRanges(e.selectedRanges ?? []);
+  function onSsSelectionChanged(): void {
+    if (!ssApiRef) return;
+    ssActiveCell    = formatCellCoord(ssApiRef.getActiveCell(), SS_COLS);
+    ssRange         = formatCellRange(ssApiRef.getSelectedRanges(), SS_COLS);
+    ssSelectedCount = ssApiRef.getSelectedCellCount();
   }
 
-  function onSsActiveCellChanged(e: any): void {
-    ssActiveCell = formatCoord(e.cell);
+  function onSsActiveCellChanged(): void {
+    if (!ssApiRef) return;
+    ssActiveCell = formatCellCoord(ssApiRef.getActiveCell(), SS_COLS);
   }
 
   function ssClearSelection(): void {
@@ -397,7 +400,7 @@
       rowData={ssRowData}
       selectionMode="multi"
       rowHeight={28}
-      cellRenderer={spreadsheetCellRenderer}
+      cellRenderer="spreadsheet"
       options={ssOptions}
       onGridReady={onSsGridReady}
       onSelectionChanged={onSsSelectionChanged}

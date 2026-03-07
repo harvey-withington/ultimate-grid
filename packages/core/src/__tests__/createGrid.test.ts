@@ -245,6 +245,25 @@ describe('createGrid', () => {
     });
   });
 
+  // ─── Cell selection API ──────────────────────────────────────────────────────
+
+  describe('cell selection API', () => {
+    it('getActiveCell returns null when nothing is selected', () => {
+      const api = createGrid({ container: makeContainer(), columnDefs: DEFS, rowData: DATA, getRowId: (d) => String(d.id) });
+      expect(api.getActiveCell()).toBeNull();
+    });
+
+    it('getSelectedRanges returns empty array initially', () => {
+      const api = createGrid({ container: makeContainer(), columnDefs: DEFS, rowData: DATA, getRowId: (d) => String(d.id) });
+      expect(api.getSelectedRanges()).toEqual([]);
+    });
+
+    it('getSelectedCellCount returns 0 initially', () => {
+      const api = createGrid({ container: makeContainer(), columnDefs: DEFS, rowData: DATA, getRowId: (d) => String(d.id) });
+      expect(api.getSelectedCellCount()).toBe(0);
+    });
+  });
+
   // ─── Lifecycle / destroy ─────────────────────────────────────────────────────
 
   describe('destroy', () => {

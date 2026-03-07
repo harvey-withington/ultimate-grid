@@ -375,6 +375,39 @@ describe('RenderPipeline', () => {
       expect(custom!.textContent).toMatch(/^\[.+\]$/);
     });
 
+    it('resolves built-in "spreadsheet" renderer by name', () => {
+      const bus      = new EventBus();
+      const SPREAD_DEFS = [
+        { key: 'row', field: 'row', headerName: '', width: 50, rowHeader: true },
+        { key: 'A',   field: 'A',   headerName: 'A', width: 100 },
+      ];
+      const colModel = new ColumnModel(SPREAD_DEFS, bus);
+      const rowModel = new ClientRowModel(bus, 28, (d: any) => String(d.row));
+      rowModel.setRowData([{ row: 1, A: 42 }]);
+      const selModel = new SelectionModel(bus, rowModel, 'multi', 'cell');
+      const api      = makeStubApi(rowModel, colModel);
+      const container = document.createElement('div');
+      document.body.appendChild(container);
+
+      const pipeline = new RenderPipeline(
+        container, bus, colModel, rowModel, selModel, api,
+        { rowHeight: 28, cellRenderer: 'spreadsheet' },
+      );
+      pipeline.mount();
+
+      // Row header cell should contain a span with the row number
+      const rowHeaderCell = container.querySelector('.ugrid-cell--row-header');
+      expect(rowHeaderCell).not.toBeNull();
+      expect(rowHeaderCell!.querySelector('span')!.textContent).toBe('1');
+
+      // Numeric cell should have tabular-nums styling
+      const cells = container.querySelectorAll('.ugrid-cell:not(.ugrid-cell--row-header)');
+      const numSpan = cells[0]?.querySelector('span');
+      expect(numSpan).not.toBeNull();
+      expect(numSpan!.style.fontVariantNumeric).toBe('tabular-nums');
+      expect(numSpan!.textContent).toBe('42');
+    });
+
     it('falls back to default when custom renderer returns null', () => {
       const bus      = new EventBus();
       const colModel = new ColumnModel<Person>(DEFS, bus);

@@ -18,7 +18,8 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { UltimateGrid } from '../src/UltimateGrid.tsx';
 import type { GridApi, ColumnDef, SortState, FilterState, Column, RowNode } from '../../core/src/types.ts';
-import { generateSpreadsheetData, SS_COLS, spreadsheetCellRenderer, formatCoord, formatRange, countCellsInRanges } from '../../core/demo/spreadsheet-data.ts';
+import { generateSpreadsheetData, SS_COLS } from '../../core/demo/spreadsheet-data.ts';
+import { formatCellCoord, formatCellRange } from '../../core/src/cell/cellUtils.ts';
 import type { SpreadsheetRow } from '../../core/demo/spreadsheet-data.ts';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -283,16 +284,20 @@ function App() {
     ssApiRef.current = api;
   }, []);
 
-  const handleSsSelectionChanged = useCallback((e: any) => {
+  const handleSsSelectionChanged = useCallback(() => {
+    const api = ssApiRef.current;
+    if (!api) return;
     setSsStats({
-      activeCell:    formatCoord(e.focusedCell),
-      range:         formatRange(e.selectedRanges ?? []),
-      selectedCount: countCellsInRanges(e.selectedRanges ?? []),
+      activeCell:    formatCellCoord(api.getActiveCell(), SS_COLS),
+      range:         formatCellRange(api.getSelectedRanges(), SS_COLS),
+      selectedCount: api.getSelectedCellCount(),
     });
   }, []);
 
-  const handleSsActiveCellChanged = useCallback((e: any) => {
-    setSsStats(prev => ({ ...prev, activeCell: formatCoord(e.cell) }));
+  const handleSsActiveCellChanged = useCallback(() => {
+    const api = ssApiRef.current;
+    if (!api) return;
+    setSsStats(prev => ({ ...prev, activeCell: formatCellCoord(api.getActiveCell(), SS_COLS) }));
   }, []);
 
   const ssClearSelection = useCallback(() => {
@@ -389,7 +394,7 @@ function App() {
               rowData={ssRowData}
               selectionMode="multi"
               rowHeight={28}
-              cellRenderer={spreadsheetCellRenderer}
+              cellRenderer="spreadsheet"
               options={ssOptions.current}
               onGridReady={handleSsGridReady}
               onSelectionChanged={handleSsSelectionChanged}

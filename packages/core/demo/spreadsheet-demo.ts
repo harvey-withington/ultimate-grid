@@ -1,6 +1,7 @@
 import '../src/styles/ugrid.css';
 import { createGrid } from '../src/createGrid';
-import type { Column, ColumnDef, RowNode, GridApi, CellCoord, CellRange } from '../src/types';
+import type { ColumnDef, GridApi } from '../src/types';
+import { formatCellCoord, formatCellRange } from '../src/cell/cellUtils';
 
 // ─── Spreadsheet-style data ──────────────────────────────────────────────────
 
@@ -49,25 +50,6 @@ const COLS: ColumnDef<SpreadsheetRow>[] = [
   { key: 'H',   field: 'H',   headerName: 'H', width: 120 },
 ];
 
-// ─── Cell renderer — row header column gets special styling ──────────────────
-
-function spreadsheetCellRenderer(col: Column, _node: RowNode, value: unknown): HTMLElement | null {
-  if (col.def.rowHeader) {
-    // Just return the content; the outer cell gets ugrid-cell--row-header from RenderPipeline
-    const span = document.createElement('span');
-    span.textContent = String(value);
-    return span;
-  }
-  // Numbers get right-aligned tabular styling
-  if (typeof value === 'number') {
-    const span = document.createElement('span');
-    span.style.fontVariantNumeric = 'tabular-nums';
-    span.textContent = String(value);
-    return span;
-  }
-  return null; // default rendering
-}
-
 // ─── State ───────────────────────────────────────────────────────────────────
 
 let _api: GridApi<SpreadsheetRow> | null = null;
@@ -90,7 +72,7 @@ export function mount(): void {
     rowHeight: 28,
     selectionMode: 'multi',
     selectionUnit: 'cell',
-    cellRenderer: spreadsheetCellRenderer,
+    cellRenderer: 'spreadsheet',
   });
 
   // ── Stats bar updates ────────────────────────────────────────────────────
@@ -98,43 +80,14 @@ export function mount(): void {
   const elRange          = document.getElementById('ss-range')!;
   const elSelectedCount  = document.getElementById('ss-selected-count')!;
 
-  function formatCoord(c: CellCoord | null): string {
-    if (!c) return '–';
-    return `${c.colId}${c.rowId}`;
-  }
-
-  function formatRange(ranges: CellRange[]): string {
-    if (ranges.length === 0) return '–';
-    return ranges.map(r => {
-      const s = `${r.start.colId}${r.start.rowId}`;
-      const e = `${r.end.colId}${r.end.rowId}`;
-      return s === e ? s : `${s}:${e}`;
-    }).join(', ');
-  }
-
-  function countCellsInRanges(ranges: CellRange[]): number {
-    if (ranges.length === 0) return 0;
-    let total = 0;
-    for (const r of ranges) {
-      const r1 = parseInt(r.start.rowId, 10);
-      const r2 = parseInt(r.end.rowId, 10);
-      const rowSpan = Math.abs(r2 - r1) + 1;
-      const c1 = COLS.findIndex(c => c.key === r.start.colId);
-      const c2 = COLS.findIndex(c => c.key === r.end.colId);
-      const colSpan = c1 >= 0 && c2 >= 0 ? Math.abs(c2 - c1) + 1 : 1;
-      total += rowSpan * colSpan;
-    }
-    return total;
-  }
-
-  _api.on('selectionChanged', (e) => {
-    elActiveCell.textContent    = formatCoord(e.focusedCell);
-    elRange.textContent         = formatRange(e.selectedRanges);
-    elSelectedCount.textContent = String(countCellsInRanges(e.selectedRanges));
+  _api.on('selectionChanged', () => {
+    elActiveCell.textContent    = formatCellCoord(_api!.getActiveCell(), COLS);
+    elRange.textContent         = formatCellRange(_api!.getSelectedRanges(), COLS);
+    elSelectedCount.textContent = String(_api!.getSelectedCellCount());
   });
 
-  _api.on('activeCellChanged', (e) => {
-    elActiveCell.textContent = formatCoord(e.cell);
+  _api.on('activeCellChanged', () => {
+    elActiveCell.textContent = formatCellCoord(_api!.getActiveCell(), COLS);
   });
 
   // ── Clear selection button ───────────────────────────────────────────────

@@ -558,6 +558,9 @@ export interface GridApi<TData = unknown> {
   deselectAll(): void;
   getSelectedRowIds(): string[];
   getSelectedRows(): TData[];
+  getActiveCell(): CellCoord | null;
+  getSelectedRanges(): CellRange[];
+  getSelectedCellCount(): number;
   setSortModel(sort: SortState[]): void;
   setFilterModel(filter: FilterState): void;
   getSortModel(): SortState[];

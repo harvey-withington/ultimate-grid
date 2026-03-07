@@ -10,6 +10,7 @@ export type { RenderPipelineOptions } from './render/RenderPipeline';
 export { createGrid } from './createGrid';
 export type { CreateGridOptions } from './createGrid';
 export { parseFilterExpression } from './filter/parseFilterExpression';
+export { formatCellCoord, formatCellRange, countCellsInRanges } from './cell/cellUtils';
 export type {
   // Coordinates
   CellCoord,

@@ -1,8 +1,12 @@
 /**
- * Shared spreadsheet data, column definitions, and helpers.
+ * Shared spreadsheet data and column definitions.
  * Used by the core demo and all framework wrapper demos.
+ *
+ * Formatting helpers (formatCellCoord, formatCellRange, countCellsInRanges)
+ * are now part of the core library — import them from '../src/index' or
+ * 'ultimate-grid'.
  */
-import type { ColumnDef, Column, RowNode, CellCoord, CellRange } from '../src/types';
+import type { ColumnDef } from '../src/types';
 
 // ─── Spreadsheet row type ────────────────────────────────────────────────────
 
@@ -53,50 +57,3 @@ export const SS_COLS: ColumnDef<SpreadsheetRow>[] = [
   { key: 'H',   field: 'H',   headerName: 'H', width: 120 },
 ];
 
-// ─── Cell renderer ───────────────────────────────────────────────────────────
-
-export function spreadsheetCellRenderer(col: Column, _node: RowNode, value: unknown): HTMLElement | null {
-  if (col.def.rowHeader) {
-    const span = document.createElement('span');
-    span.textContent = String(value);
-    return span;
-  }
-  if (typeof value === 'number') {
-    const span = document.createElement('span');
-    span.style.fontVariantNumeric = 'tabular-nums';
-    span.textContent = String(value);
-    return span;
-  }
-  return null;
-}
-
-// ─── Formatting helpers ──────────────────────────────────────────────────────
-
-export function formatCoord(c: CellCoord | null): string {
-  if (!c) return '\u2013';
-  return `${c.colId}${c.rowId}`;
-}
-
-export function formatRange(ranges: CellRange[]): string {
-  if (ranges.length === 0) return '\u2013';
-  return ranges.map(r => {
-    const s = `${r.start.colId}${r.start.rowId}`;
-    const e = `${r.end.colId}${r.end.rowId}`;
-    return s === e ? s : `${s}:${e}`;
-  }).join(', ');
-}
-
-export function countCellsInRanges(ranges: CellRange[]): number {
-  if (ranges.length === 0) return 0;
-  let total = 0;
-  for (const r of ranges) {
-    const r1 = parseInt(r.start.rowId, 10);
-    const r2 = parseInt(r.end.rowId, 10);
-    const rowSpan = Math.abs(r2 - r1) + 1;
-    const c1 = SS_COLS.findIndex(c => c.key === r.start.colId);
-    const c2 = SS_COLS.findIndex(c => c.key === r.end.colId);
-    const colSpan = c1 >= 0 && c2 >= 0 ? Math.abs(c2 - c1) + 1 : 1;
-    total += rowSpan * colSpan;
-  }
-  return total;
-}

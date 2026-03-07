@@ -10,6 +10,7 @@ import type { ColumnModel } from '../column/ColumnModel';
 import { parseFilterExpression } from '../filter/parseFilterExpression';
 import type { ClientRowModel } from '../row/ClientRowModel';
 import type { SelectionModel } from '../selection/SelectionModel';
+import { resolveCellRenderer, type CellRendererFn } from './builtInRenderers';
 
 // ─── Public options ────────────────────────────────────────────────────────────
 
@@ -18,8 +19,12 @@ export interface RenderPipelineOptions {
   headerHeight?: number;
   filterRowHeight?: number;
   overscan?: number;
-  /** Called to render custom cell content. Return null to use default. */
-  cellRenderer?: (col: Column, node: RowNode, value: unknown) => HTMLElement | null;
+  /**
+   * Custom cell renderer. Pass a function `(col, node, value) => HTMLElement | null`,
+   * or a built-in renderer name such as `'spreadsheet'`.
+   * Return null from a function to fall back to the default renderer.
+   */
+  cellRenderer?: CellRendererFn | string;
 }
 
 const DEFAULTS: Required<Omit<RenderPipelineOptions, 'cellRenderer'>> = {
@@ -53,7 +58,7 @@ const DEFAULTS: Required<Omit<RenderPipelineOptions, 'cellRenderer'>> = {
  */
 export class RenderPipeline<TData = unknown> {
   private readonly _opts: Required<Omit<RenderPipelineOptions, 'cellRenderer'>>;
-  private readonly _cellRenderer?: RenderPipelineOptions['cellRenderer'];
+  private readonly _cellRenderer: CellRendererFn | undefined;
 
   // DOM refs
   private _root!: HTMLElement;
@@ -102,7 +107,7 @@ export class RenderPipeline<TData = unknown> {
       filterRowHeight: opts.filterRowHeight ?? DEFAULTS.filterRowHeight,
       overscan:        opts.overscan        ?? DEFAULTS.overscan,
     };
-    this._cellRenderer = opts.cellRenderer;
+    this._cellRenderer = resolveCellRenderer(opts.cellRenderer);
   }
 
   // ─── Lifecycle ──────────────────────────────────────────────────────────────

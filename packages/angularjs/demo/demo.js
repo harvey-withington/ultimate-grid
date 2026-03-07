@@ -12,7 +12,8 @@
 import '../../core/src/styles/ugrid.css';
 import '../../core/demo/demo-shared.css';
 import '../src/ultimate-grid-angularjs.js';  // registers the 'ultimateGrid' module
-import { generateSpreadsheetData, SS_COLS, spreadsheetCellRenderer, formatCoord, formatRange, countCellsInRanges } from '../../core/demo/spreadsheet-data.ts';
+import { generateSpreadsheetData, SS_COLS } from '../../core/demo/spreadsheet-data.ts';
+import { formatCellCoord, formatCellRange } from '../../core/src/cell/cellUtils.ts';
 
 // ─── Data helpers ─────────────────────────────────────────────────────────────
 
@@ -257,7 +258,7 @@ angular.module('ugridDemo', ['ultimateGrid'])
     getRowId:       function(d) { return String(d.row); },
     rowHeight:      28,
     selectionUnit:  'cell',
-    cellRenderer:   spreadsheetCellRenderer,
+    cellRenderer:   'spreadsheet',
   };
   vm.ssGridApi = null;
   vm.ssStats = { activeCell: '\u2013', range: '\u2013', selectedCount: 0 };
@@ -266,17 +267,17 @@ angular.module('ugridDemo', ['ultimateGrid'])
     vm.ssGridApi = api;
   };
 
-  $rootScope.$on('ugrid:selectionChanged', function(_, e) {
-    if (vm.page === 'spreadsheet' && e.selectedRanges) {
-      vm.ssStats.activeCell    = formatCoord(e.focusedCell);
-      vm.ssStats.range         = formatRange(e.selectedRanges);
-      vm.ssStats.selectedCount = countCellsInRanges(e.selectedRanges);
+  $rootScope.$on('ugrid:selectionChanged', function() {
+    if (vm.page === 'spreadsheet' && vm.ssGridApi) {
+      vm.ssStats.activeCell    = formatCellCoord(vm.ssGridApi.getActiveCell(), SS_COLS);
+      vm.ssStats.range         = formatCellRange(vm.ssGridApi.getSelectedRanges(), SS_COLS);
+      vm.ssStats.selectedCount = vm.ssGridApi.getSelectedCellCount();
     }
   });
 
-  $rootScope.$on('ugrid:activeCellChanged', function(_, e) {
-    if (vm.page === 'spreadsheet') {
-      vm.ssStats.activeCell = formatCoord(e.cell);
+  $rootScope.$on('ugrid:activeCellChanged', function() {
+    if (vm.page === 'spreadsheet' && vm.ssGridApi) {
+      vm.ssStats.activeCell = formatCellCoord(vm.ssGridApi.getActiveCell(), SS_COLS);
     }
   });
 
