@@ -192,7 +192,7 @@ Override variables in your own CSS:
 :root {
   --ugrid-bg:              #ffffff;
   --ugrid-bg-header:       #f8f9fb;
-  --ugrid-bg-row-selected: #dbeafe;
+  --ugrid-selection-bg:    #dbeafe;
   --ugrid-text:            #111827;
   --ugrid-border-color:    #d0d5dd;
   --ugrid-row-height:      36px;

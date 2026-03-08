@@ -83,7 +83,6 @@
   --ugrid-bg-header: var(--ugrid-lt-bg-header);
   --ugrid-bg-row-even: var(--ugrid-lt-bg-row-even);
   --ugrid-bg-row-hover: var(--ugrid-lt-bg-row-hover);
-  --ugrid-bg-row-selected: var(--ugrid-lt-bg-row-selected);
   --ugrid-bg-filter: var(--ugrid-lt-bg-filter);
   --ugrid-bg-filter-input: var(--ugrid-lt-bg-filter-input);
   --ugrid-bg-filter-focus: var(--ugrid-lt-bg-filter-focus);
@@ -121,7 +120,6 @@
     --ugrid-bg-header: var(--ugrid-dk-bg-header);
     --ugrid-bg-row-even: var(--ugrid-dk-bg-row-even);
     --ugrid-bg-row-hover: var(--ugrid-dk-bg-row-hover);
-    --ugrid-bg-row-selected: var(--ugrid-dk-bg-row-selected);
     --ugrid-bg-filter: var(--ugrid-dk-bg-filter);
     --ugrid-bg-filter-input: var(--ugrid-dk-bg-filter-input);
     --ugrid-bg-filter-focus: var(--ugrid-dk-bg-filter-focus);
@@ -158,7 +156,6 @@ body.demo-dark,
   --ugrid-bg-header: var(--ugrid-dk-bg-header);
   --ugrid-bg-row-even: var(--ugrid-dk-bg-row-even);
   --ugrid-bg-row-hover: var(--ugrid-dk-bg-row-hover);
-  --ugrid-bg-row-selected: var(--ugrid-dk-bg-row-selected);
   --ugrid-bg-filter: var(--ugrid-dk-bg-filter);
   --ugrid-bg-filter-input: var(--ugrid-dk-bg-filter-input);
   --ugrid-bg-filter-focus: var(--ugrid-dk-bg-filter-focus);
@@ -357,7 +354,7 @@ body.demo-dark,
   background: var(--ugrid-bg-row-hover);
 }
 .ugrid-row.ugrid-row--selected {
-  background: var(--ugrid-bg-row-selected) !important;
+  background: var(--ugrid-selection-bg) !important;
 }
 
 /* ── Cell-mode overrides (spreadsheet) ─── suppress row-level selection visuals */
