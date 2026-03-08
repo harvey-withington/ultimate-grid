@@ -288,26 +288,32 @@ a:hover { text-decoration: underline; }
   gap: 2px;
   border-bottom: 2px solid var(--site-border);
   margin-bottom: 0;
-  overflow-x: auto;
 }
 .site-fw-tab {
+  position: relative;
   padding: 10px 20px;
   font-size: 14px;
   font-weight: 600;
   color: var(--site-text-muted);
   background: none;
   border: none;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -2px;
   cursor: pointer;
-  transition: color 0.15s, border-color 0.15s;
+  transition: color 0.15s;
   white-space: nowrap;
 }
-.site-fw-tab:hover { color: var(--site-text); }
-.site-fw-tab.active {
-  color: var(--site-accent);
-  border-bottom-color: var(--site-accent);
+.site-fw-tab::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 2px;
+  background: transparent;
+  transition: background 0.15s;
 }
+.site-fw-tab:hover { color: var(--site-text); }
+.site-fw-tab.active { color: var(--site-accent); }
+.site-fw-tab.active::after { background: var(--site-accent); }
 .site-fw-panel {
   display: none;
   padding: 24px 0 0;
