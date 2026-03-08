@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="128" y2="128" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#a78bfa"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+  </defs>
+  <!-- Rounded square background -->
+  <rect width="128" height="128" rx="28" fill="url(#g)"/>
+  <!-- Lightning bolt -->
+  <path d="M72 14L44 62h20L52 114l36-54H68L80 14H72z" fill="#fff"/>
+  <!-- Grid lines (subtle) -->
+  <line x1="28" y1="44" x2="100" y2="44" stroke="rgba(255,255,255,0.25)" stroke-width="2" stroke-linecap="round"/>
+  <line x1="28" y1="64" x2="100" y2="64" stroke="rgba(255,255,255,0.25)" stroke-width="2" stroke-linecap="round"/>
+  <line x1="28" y1="84" x2="100" y2="84" stroke="rgba(255,255,255,0.25)" stroke-width="2" stroke-linecap="round"/>
+  <line x1="50" y1="30" x2="50" y2="98" stroke="rgba(255,255,255,0.18)" stroke-width="2" stroke-linecap="round"/>
+  <line x1="78" y1="30" x2="78" y2="98" stroke="rgba(255,255,255,0.18)" stroke-width="2" stroke-linecap="round"/>
+</svg>

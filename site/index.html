@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ultimate Data Grid — High-performance data grid for every framework</title>
+  <meta name="description" content="A fully open-source, MIT-licensed, high-performance data grid with zero runtime dependencies. Framework adapters for React, Vue, Svelte, Angular, and AngularJS." />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+</head>
+<body>
+
+  <!-- ── Navigation ───────────────────────────────────────────────────────── -->
+  <nav class="site-nav">
+    <div class="site-nav-inner">
+      <a class="site-nav-logo" href="#">
+        <img src="/logo.svg" alt="Ultimate Grid logo" />
+        Ultimate Grid
+      </a>
+      <div class="site-nav-links">
+        <a href="#features">Features</a>
+        <a href="#demo">Demo</a>
+        <a href="#frameworks">Frameworks</a>
+        <a href="#install">Install</a>
+      </div>
+      <a class="site-nav-gh" href="https://github.com/harvey-withington/ultimate-grid" target="_blank" rel="noopener">
+        <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        GitHub
+      </a>
+    </div>
+  </nav>
+
+  <!-- ── Hero ─────────────────────────────────────────────────────────────── -->
+  <section class="site-hero">
+    <div class="site-hero-inner">
+      <img class="site-hero-logo" src="/logo.svg" alt="" />
+      <h1>Ultimate Data Grid</h1>
+      <p>A fully open-source, high-performance data grid with zero runtime dependencies. One engine, every framework.</p>
+      <div class="site-hero-badges">
+        <span class="site-badge site-badge--accent">MIT Licensed</span>
+        <span class="site-badge">Zero Dependencies</span>
+        <span class="site-badge">TypeScript</span>
+        <span class="site-badge">6 Frameworks</span>
+      </div>
+      <a class="site-hero-cta" href="#demo">See it in action &darr;</a>
+    </div>
+  </section>
+
+  <!-- ── Features ─────────────────────────────────────────────────────────── -->
+  <section class="site-section" id="features">
+    <div class="site-section-header">
+      <h2>Built for Performance</h2>
+      <p>Everything you need in a data grid, nothing you don't.</p>
+    </div>
+    <div class="site-features">
+      <div class="site-feature-card">
+        <span class="site-feature-icon">🚀</span>
+        <h3>Virtual Scrolling</h3>
+        <p>Both axes virtualized. Handles millions of rows at 60 fps with a tiny DOM footprint.</p>
+      </div>
+      <div class="site-feature-card">
+        <span class="site-feature-icon">🔀</span>
+        <h3>Multi-Sort</h3>
+        <p>Click to sort. Ctrl+click to add secondary sorts. Three-state cycle: asc, desc, off.</p>
+      </div>
+      <div class="site-feature-card">
+        <span class="site-feature-icon">🔍</span>
+        <h3>Filter Expressions</h3>
+        <p>Type <code>&gt;50000</code>, <code>2020..2023</code>, or <code>^Alice</code> directly into the filter row. No dropdowns needed.</p>
+      </div>
+      <div class="site-feature-card">
+        <span class="site-feature-icon">🖱️</span>
+        <h3>Drag Select</h3>
+        <p>Click+drag for ranges. Ctrl+drag to add or remove. Supports both row and cell selection modes.</p>
+      </div>
+      <div class="site-feature-card">
+        <span class="site-feature-icon">🌗</span>
+        <h3>Light &amp; Dark Mode</h3>
+        <p>CSS custom properties with automatic OS detection. Override with one class toggle.</p>
+      </div>
+      <div class="site-feature-card">
+        <span class="site-feature-icon">📦</span>
+        <h3>Zero Dependencies</h3>
+        <p>Pure vanilla TypeScript core. No bloat, no supply-chain risk, no version conflicts.</p>
+      </div>
+      <div class="site-feature-card">
+        <span class="site-feature-icon">�</span>
+        <h3>Spreadsheet Mode</h3>
+        <p>Cell-level selection with Excel-style ranges, row headers, keyboard navigation, and A1-notation coordinates.</p>
+      </div>
+      <div class="site-feature-card">
+        <span class="site-feature-icon">�🔌</span>
+        <h3>Plugin Architecture</h3>
+        <p>Extend with custom cell renderers, filter logic, and event handlers without forking.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Live Demo ────────────────────────────────────────────────────────── -->
+  <section class="site-section site-section--alt" id="demo">
+    <div class="site-section-header">
+      <h2>Try It Live</h2>
+    </div>
+    <div class="site-demo-wrap">
+      <div class="site-demo-toolbar">
+        <nav class="site-demo-tabs">
+          <button class="site-demo-tab active" data-demo="datagrid">Data Grid</button>
+          <button class="site-demo-tab" data-demo="spreadsheet">Spreadsheet</button>
+        </nav>
+        <span class="site-demo-stats" id="demo-stats-dg" style="font-size:12px;opacity:0.6">Showing <span id="demo-stat-showing">2000</span> of <span id="demo-stat-total">2000</span> rows &nbsp;·&nbsp; Sort: <span id="demo-stat-sort">none</span> &nbsp;·&nbsp; Selected: <span id="demo-stat-selected">0</span></span>
+        <span class="site-demo-stats" id="demo-stats-ss" style="font-size:12px;opacity:0.6;display:none">Active: <span id="ss-active-cell">–</span> &nbsp;Range: <span id="ss-range">–</span> &nbsp;Cells: <span id="ss-selected-count">0</span></span>
+        <span class="spacer"></span>
+        <button class="btn-theme" id="demo-theme-toggle" title="Toggle dark/light mode">🌙</button>
+      </div>
+      <div class="site-demo-grid-area" id="demo-page-datagrid">
+        <div id="demo-grid"></div>
+      </div>
+      <div class="site-demo-grid-area" id="demo-page-spreadsheet" style="display:none">
+        <div id="ss-grid-container"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Framework Usage ──────────────────────────────────────────────────── -->
+  <section class="site-section" id="frameworks">
+    <div class="site-section-header">
+      <h2>Every Framework, One API</h2>
+      <p>Thin wrappers around the same engine. Pick your framework.</p>
+    </div>
+    <div class="site-fw-tabs">
+      <div class="site-fw-tab-bar">
+        <button class="site-fw-tab active" data-fw="vanilla">Vanilla JS</button>
+        <button class="site-fw-tab" data-fw="react">React</button>
+        <button class="site-fw-tab" data-fw="vue">Vue 3</button>
+        <button class="site-fw-tab" data-fw="svelte">Svelte</button>
+        <button class="site-fw-tab" data-fw="angular">Angular</button>
+        <button class="site-fw-tab" data-fw="angularjs">AngularJS</button>
+      </div>
+
+      <!-- ── Vanilla JS ─────────────────────────────────────────────────── -->
+      <div class="site-fw-panel active" id="fw-vanilla">
+        <div class="site-fw-install"><span class="prompt">$ </span><code>npm install @ultimate-grid/core</code></div>
+        <div class="site-fw-code-label">Usage</div>
+        <div class="site-fw-code"><pre><span class="kw">import</span> { createGrid } <span class="kw">from</span> <span class="str">'@ultimate-grid/core'</span>;
+<span class="kw">import</span> <span class="str">'@ultimate-grid/core/styles/ugrid.css'</span>;
+
+<span class="kw">const</span> api <span class="op">=</span> <span class="fn">createGrid</span>({
+  container: document.<span class="fn">getElementById</span>(<span class="str">'grid'</span>),
+  columnDefs: [
+    { key: <span class="str">'name'</span>,   field: <span class="str">'name'</span>,   headerName: <span class="str">'Name'</span>   },
+    { key: <span class="str">'salary'</span>, field: <span class="str">'salary'</span>, headerName: <span class="str">'Salary'</span> },
+    { key: <span class="str">'joined'</span>, field: <span class="str">'joined'</span>, headerName: <span class="str">'Joined'</span> },
+  ],
+  rowData: [
+    { name: <span class="str">'Alice'</span>, salary: <span class="num">95000</span>, joined: <span class="str">'2020-03-01'</span> },
+    { name: <span class="str">'Bob'</span>,   salary: <span class="num">72000</span>, joined: <span class="str">'2018-07-15'</span> },
+  ],
+  selectionMode: <span class="str">'multi'</span>,
+});
+
+<span class="cm">// API methods</span>
+api.<span class="fn">setSortModel</span>([{ colId: <span class="str">'name'</span>, direction: <span class="str">'asc'</span> }]);
+api.<span class="fn">setFilterModel</span>({ salary: { value: <span class="str">'&gt;80000'</span> } });</pre></div>
+      </div>
+
+      <!-- ── React ──────────────────────────────────────────────────────── -->
+      <div class="site-fw-panel" id="fw-react">
+        <div class="site-fw-install"><span class="prompt">$ </span><code>npm install @ultimate-grid/core @ultimate-grid/react</code></div>
+        <div class="site-fw-code-label">Usage</div>
+        <div class="site-fw-code"><pre><span class="kw">import</span> { <span class="ty">UltimateGrid</span> } <span class="kw">from</span> <span class="str">'@ultimate-grid/react'</span>;
+<span class="kw">import</span> <span class="str">'@ultimate-grid/core/styles/ugrid.css'</span>;
+
+<span class="kw">function</span> <span class="fn">App</span>() {
+  <span class="kw">const</span> [gridApi, setGridApi] <span class="op">=</span> <span class="fn">useState</span>(<span class="kw">null</span>);
+
+  <span class="kw">return</span> (
+    <span class="tag">&lt;UltimateGrid</span>
+      <span class="attr">columnDefs</span><span class="op">=</span>{columnDefs}
+      <span class="attr">rowData</span><span class="op">=</span>{rowData}
+      <span class="attr">selectionMode</span><span class="op">=</span><span class="str">"multi"</span>
+      <span class="attr">rowHeight</span><span class="op">=</span>{<span class="num">36</span>}
+      <span class="attr">cellRenderer</span><span class="op">=</span>{customRenderer}
+      <span class="attr">onGridReady</span><span class="op">=</span>{(api) <span class="op">=&gt;</span> <span class="fn">setGridApi</span>(api)}
+      <span class="attr">onSortChanged</span><span class="op">=</span>{handleSort}
+      <span class="attr">onFilterChanged</span><span class="op">=</span>{handleFilter}
+      <span class="attr">onSelectionChanged</span><span class="op">=</span>{handleSelection}
+    <span class="tag">/&gt;</span>
+  );
+}</pre></div>
+      </div>
+
+      <!-- ── Vue 3 ──────────────────────────────────────────────────────── -->
+      <div class="site-fw-panel" id="fw-vue">
+        <div class="site-fw-install"><span class="prompt">$ </span><code>npm install @ultimate-grid/core @ultimate-grid/vue</code></div>
+        <div class="site-fw-code-label">Usage</div>
+        <div class="site-fw-code"><pre><span class="tag">&lt;script setup&gt;</span>
+<span class="kw">import</span> { <span class="ty">UltimateGrid</span> } <span class="kw">from</span> <span class="str">'@ultimate-grid/vue'</span>;
+<span class="kw">import</span> <span class="str">'@ultimate-grid/core/styles/ugrid.css'</span>;
+
+<span class="kw">const</span> columnDefs <span class="op">=</span> [<span class="cm">/* ... */</span>];
+<span class="kw">const</span> rowData <span class="op">=</span> <span class="fn">ref</span>([<span class="cm">/* ... */</span>]);
+
+<span class="kw">function</span> <span class="fn">onGridReady</span>(api) {
+  <span class="cm">// Store api reference</span>
+}
+<span class="tag">&lt;/script&gt;</span>
+
+<span class="tag">&lt;template&gt;</span>
+  <span class="tag">&lt;UltimateGrid</span>
+    <span class="attr">:column-defs</span><span class="op">=</span><span class="str">"columnDefs"</span>
+    <span class="attr">:row-data</span><span class="op">=</span><span class="str">"rowData"</span>
+    <span class="attr">selection-mode</span><span class="op">=</span><span class="str">"multi"</span>
+    <span class="attr">:row-height</span><span class="op">=</span><span class="str">"36"</span>
+    <span class="attr">@grid-ready</span><span class="op">=</span><span class="str">"onGridReady"</span>
+    <span class="attr">@sort-changed</span><span class="op">=</span><span class="str">"onSortChanged"</span>
+    <span class="attr">@filter-changed</span><span class="op">=</span><span class="str">"onFilterChanged"</span>
+    <span class="attr">@selection-changed</span><span class="op">=</span><span class="str">"onSelectionChanged"</span>
+  <span class="tag">/&gt;</span>
+<span class="tag">&lt;/template&gt;</span></pre></div>
+      </div>
+
+      <!-- ── Svelte ─────────────────────────────────────────────────────── -->
+      <div class="site-fw-panel" id="fw-svelte">
+        <div class="site-fw-install"><span class="prompt">$ </span><code>npm install @ultimate-grid/core @ultimate-grid/svelte</code></div>
+        <div class="site-fw-code-label">Usage</div>
+        <div class="site-fw-code"><pre><span class="tag">&lt;script lang="ts"&gt;</span>
+  <span class="kw">import</span> <span class="ty">UltimateGrid</span> <span class="kw">from</span> <span class="str">'@ultimate-grid/svelte'</span>;
+  <span class="kw">import</span> <span class="str">'@ultimate-grid/core/styles/ugrid.css'</span>;
+
+  <span class="kw">let</span> gridApi <span class="op">=</span> <span class="kw">null</span>;
+  <span class="kw">const</span> columnDefs <span class="op">=</span> [<span class="cm">/* ... */</span>];
+  <span class="kw">let</span> rowData <span class="op">=</span> [<span class="cm">/* ... */</span>];
+<span class="tag">&lt;/script&gt;</span>
+
+<span class="tag">&lt;UltimateGrid</span>
+  {<span class="attr">columnDefs</span>}
+  {<span class="attr">rowData</span>}
+  <span class="attr">selectionMode</span><span class="op">=</span><span class="str">"multi"</span>
+  <span class="attr">rowHeight</span><span class="op">=</span>{<span class="num">36</span>}
+  <span class="attr">onGridReady</span><span class="op">=</span>{(api) <span class="op">=&gt;</span> gridApi <span class="op">=</span> api}
+  <span class="attr">onSortChanged</span><span class="op">=</span>{handleSort}
+  <span class="attr">onFilterChanged</span><span class="op">=</span>{handleFilter}
+  <span class="attr">onSelectionChanged</span><span class="op">=</span>{handleSelection}
+<span class="tag">/&gt;</span></pre></div>
+      </div>
+
+      <!-- ── Angular ────────────────────────────────────────────────────── -->
+      <div class="site-fw-panel" id="fw-angular">
+        <div class="site-fw-install"><span class="prompt">$ </span><code>npm install @ultimate-grid/core @ultimate-grid/angular</code></div>
+        <div class="site-fw-code-label">Usage</div>
+        <div class="site-fw-code"><pre><span class="kw">import</span> { <span class="ty">UltimateGridComponent</span> } <span class="kw">from</span> <span class="str">'@ultimate-grid/angular'</span>;
+<span class="kw">import</span> <span class="str">'@ultimate-grid/core/styles/ugrid.css'</span>;
+
+<span class="op">@</span><span class="fn">Component</span>({
+  standalone: <span class="kw">true</span>,
+  imports: [<span class="ty">UltimateGridComponent</span>],
+  template: <span class="str">`
+    &lt;ultimate-grid
+      [columnDefs]="columnDefs"
+      [rowData]="rowData"
+      selectionMode="multi"
+      [rowHeight]="36"
+      [cellRenderer]="cellRenderer"
+      (gridReady)="onGridReady($event)"
+      (sortChanged)="onSortChanged($event)"
+      (filterChanged)="onFilterChanged($event)"
+      (selectionChanged)="onSelectionChanged($event)"
+    /&gt;
+  `</span>,
+})
+<span class="kw">export class</span> <span class="ty">AppComponent</span> {
+  columnDefs <span class="op">=</span> [<span class="cm">/* ... */</span>];
+  rowData <span class="op">=</span> [<span class="cm">/* ... */</span>];
+}</pre></div>
+      </div>
+
+      <!-- ── AngularJS ──────────────────────────────────────────────────── -->
+      <div class="site-fw-panel" id="fw-angularjs">
+        <div class="site-fw-install"><span class="prompt">$ </span><code>npm install @ultimate-grid/core @ultimate-grid/angularjs</code></div>
+        <div class="site-fw-code-label">Usage</div>
+        <div class="site-fw-code"><pre><span class="cm">// Register the module</span>
+angular.<span class="fn">module</span>(<span class="str">'myApp'</span>, [<span class="str">'ultimateGrid'</span>])
+
+<span class="cm">// In your template:</span>
+<span class="tag">&lt;ultimate-grid</span>
+  <span class="attr">column-defs</span><span class="op">=</span><span class="str">"vm.columnDefs"</span>
+  <span class="attr">row-data</span><span class="op">=</span><span class="str">"vm.rowData"</span>
+  <span class="attr">options</span><span class="op">=</span><span class="str">"vm.gridOptions"</span>
+  <span class="attr">selection-mode</span><span class="op">=</span><span class="str">"multi"</span>
+  <span class="attr">on-grid-ready</span><span class="op">=</span><span class="str">"vm.onGridReady(api)"</span>
+  <span class="attr">api</span><span class="op">=</span><span class="str">"vm.gridApi"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;/ultimate-grid&gt;</span>
+
+<span class="cm">// Events broadcast to $rootScope:</span>
+$rootScope.<span class="fn">$on</span>(<span class="str">'ugrid:selectionChanged'</span>, <span class="kw">function</span>(_, e) {
+  <span class="cm">// No $scope.$apply() needed — digest-safe</span>
+  vm.selected <span class="op">=</span> e.selectedRowIds.length;
+});</pre></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── Install ──────────────────────────────────────────────────────────── -->
+  <section class="site-section site-section--alt" id="install">
+    <div class="site-section-header">
+      <h2>Get Started</h2>
+      <p>Install the core and your framework wrapper of choice.</p>
+    </div>
+    <div class="site-install-grid">
+      <div class="site-install-card">
+        <h3>Clone &amp; Run Locally</h3>
+        <pre>git clone https://github.com/harvey-withington/ultimate-grid.git
+cd ultimate-grid
+npm install
+npm run dev</pre>
+      </div>
+      <div class="site-install-card">
+        <h3>Install via npm</h3>
+        <pre>npm install @ultimate-grid/core
+
+# Framework wrappers (pick one)
+npm install @ultimate-grid/react
+npm install @ultimate-grid/vue
+npm install @ultimate-grid/svelte
+npm install @ultimate-grid/angular
+npm install @ultimate-grid/angularjs</pre>
+      </div>
+      <div class="site-install-card">
+        <h3>Run the Demos</h3>
+        <pre>npm run dev           # Core (Vanilla JS)
+npm run dev:react     # React
+npm run dev:vue       # Vue 3
+npm run dev:svelte    # Svelte
+npm run dev:angular   # Angular 17+
+npm run dev:angularjs # AngularJS 1.x</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Footer ───────────────────────────────────────────────────────────── -->
+  <footer class="site-footer">
+    <p>
+      <a href="https://github.com/harvey-withington/ultimate-grid">Ultimate Data Grid</a>
+      &nbsp;&middot;&nbsp; MIT License
+      &nbsp;&middot;&nbsp; <a href="https://github.com/harvey-withington/ultimate-grid">GitHub</a>
+      &nbsp;&middot;&nbsp; <a href="https://github.com/harvey-withington/ultimate-grid/blob/main/CONTRIBUTING.md">Contributing</a>
+    </p>
+  </footer>
+
+  <script type="module" src="./src/main.ts"></script>
+</body>
+</html>

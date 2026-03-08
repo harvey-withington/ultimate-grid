@@ -12,7 +12,9 @@
     "dev:react":   "vite --config packages/react/vite.config.ts",
     "dev:vue":     "vite --config packages/vue/vite.config.ts",
     "dev:svelte":  "vite --config packages/svelte/vite.config.ts",
-    "dev:angular": "vite --config packages/angular/vite.config.ts"
+    "dev:angular": "vite --config packages/angular/vite.config.ts",
+    "dev:site":    "vite --config site/vite.config.ts",
+    "build:site":  "vite build --config site/vite.config.ts"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
