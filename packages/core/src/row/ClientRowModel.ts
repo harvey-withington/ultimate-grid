@@ -44,6 +44,8 @@ export class ClientRowModel<TData = unknown> implements RowModel<TData> {
     private readonly _bus: IEventBus,
     private readonly _defaultRowHeight = DEFAULT_ROW_HEIGHT,
     private readonly _rowIdFn?: (data: TData) => string,
+    /** Maps a colId to the data property it reads. Defaults to the colId itself. */
+    private readonly _fieldFor?: (colId: string) => string,
   ) {}
 
   // ─── RowModel interface ────────────────────────────────────────────────────
@@ -191,7 +193,8 @@ export class ClientRowModel<TData = unknown> implements RowModel<TData> {
 
   private _getValue(node: RowNode<TData>, colId: string): unknown {
     if (node.data === null) return null;
-    return (node.data as Record<string, unknown>)[colId];
+    const field = this._fieldFor ? this._fieldFor(colId) : colId;
+    return (node.data as Record<string, unknown>)[field];
   }
 
   private _defaultCompare(a: unknown, b: unknown): number {

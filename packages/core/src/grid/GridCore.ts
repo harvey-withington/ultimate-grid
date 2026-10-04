@@ -64,10 +64,13 @@ export class GridCore<TData = unknown> {
     );
 
     // 3. RowModel
+    // Sort/filter must read the same property the renderer displays (def.field),
+    // falling back to the colId for columns without a field.
     this._rowModel = new ClientRowModel<TData>(
       this._bus,
       options.rowHeight ?? 40,
       options.getRowId,
+      (colId) => (this._columnModel.getById(colId)?.def.field as string | undefined) ?? colId,
     );
 
     // 4. VirtualScrollEngine
@@ -160,18 +163,14 @@ export class GridCore<TData = unknown> {
       getSelectedRanges(): CellRange[] { return []; },
       getSelectedCellCount(): number { return 0; },
 
-      // ── Sort ──
+      // ── Sort ── (the sortChanged listener in the constructor applies it to the row model)
       setSortModel(sort: SortState[]) {
-        self._sortState = sort;
-        self._rowModel.applySort(sort);
         self._bus.emit('sortChanged', { type: 'sortChanged', source: 'api', sortState: sort });
       },
       getSortModel(): SortState[] { return [...self._sortState]; },
 
-      // ── Filter ──
+      // ── Filter ── (the filterChanged listener in the constructor applies it to the row model)
       setFilterModel(filter: FilterState) {
-        self._filterState = filter;
-        self._rowModel.applyFilter(filter);
         self._bus.emit('filterChanged', { type: 'filterChanged', source: 'api', filterState: filter });
       },
       getFilterModel(): FilterState { return { ...self._filterState }; },
@@ -317,14 +316,10 @@ export class GridCore<TData = unknown> {
 
   private _applyState(state: Partial<GridState>): void {
     if (state.sort) {
-      this._sortState = state.sort;
-      this._rowModel.applySort(this._sortState);
-      this._bus.emit('sortChanged', { type: 'sortChanged', source: 'api', sortState: this._sortState });
+      this._bus.emit('sortChanged', { type: 'sortChanged', source: 'api', sortState: state.sort });
     }
     if (state.filter) {
-      this._filterState = state.filter;
-      this._rowModel.applyFilter(this._filterState);
-      this._bus.emit('filterChanged', { type: 'filterChanged', source: 'api', filterState: this._filterState });
+      this._bus.emit('filterChanged', { type: 'filterChanged', source: 'api', filterState: state.filter });
     }
     if (state.columns) {
       for (const cs of state.columns) {

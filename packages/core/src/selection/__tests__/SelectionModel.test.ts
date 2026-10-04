@@ -163,6 +163,18 @@ describe('SelectionModel', () => {
       sel.deselectAll();
       expect(handler).not.toHaveBeenCalled();
     });
+
+    it('deselectAll clears cell ranges even when no rows are selected, emitting once', () => {
+      const { sel, bus } = makeSetup();
+      sel.selectRange({ rowId: '1', colId: 'name' }, { rowId: '2', colId: 'name' });
+      expect(sel.selectedRowIds.size).toBe(0);
+      const handler = vi.fn();
+      bus.on('selectionChanged', handler);
+      sel.deselectAll();
+      expect(sel.selectedRanges).toHaveLength(0);
+      expect(handler).toHaveBeenCalledOnce();
+      expect(handler.mock.calls[0][0].selectedRanges).toEqual([]);
+    });
   });
 
   // ─── selectRowRange ───────────────────────────────────────────────────────

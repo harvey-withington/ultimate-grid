@@ -179,6 +179,67 @@ describe('GridCore', () => {
     });
   });
 
+  // ─── Sort/filter read def.field, not the column key ───────────────────────
+
+  describe('columns whose key differs from field', () => {
+    const defs: ColumnDef<{ id: number; cost: number }>[] = [{ key: 'price', field: 'cost' }];
+    const data = [{ id: 1, cost: 30 }, { id: 2, cost: 10 }, { id: 3, cost: 20 }];
+    const make = () => {
+      const core = new GridCore({ columnDefs: defs, rowData: data, getRowId: (d) => String(d.id) });
+      return { core, api: core.getApi() };
+    };
+
+    it('sorts by the field value', () => {
+      const { core, api } = make();
+      api.setSortModel([{ colId: 'price', direction: 'asc', index: 0 }]);
+      expect(core.rowModel.displayRows.map((r) => r.data!.cost)).toEqual([10, 20, 30]);
+    });
+
+    it('filters by the field value', () => {
+      const { core, api } = make();
+      api.setFilterModel({ price: { type: 'number', operator: 'equals', value: 10 } });
+      expect(core.rowModel.displayRows.map((r) => r.data!.cost)).toEqual([10]);
+    });
+
+    it('falls back to the key for columns without a field', () => {
+      const core = new GridCore({ columnDefs: [{ key: 'cost' }], rowData: data });
+      core.getApi().setSortModel([{ colId: 'cost', direction: 'desc', index: 0 }]);
+      expect(core.rowModel.displayRows.map((r) => r.data!.cost)).toEqual([30, 20, 10]);
+    });
+  });
+
+  // ─── Sort/filter applied once per API call ────────────────────────────────
+
+  describe('row model rebuilds', () => {
+    it('setFilterModel filters the row model exactly once', () => {
+      const { core, api } = makeCore();
+      const spy = vi.spyOn(core.rowModel, 'applyFilter');
+      api.setFilterModel({ city: { type: 'text', operator: 'equals', value: 'london' } });
+      expect(spy).toHaveBeenCalledOnce();
+    });
+
+    it('setSortModel sorts the row model exactly once', () => {
+      const { core, api } = makeCore();
+      const spy = vi.spyOn(core.rowModel, 'applySort');
+      api.setSortModel([{ colId: 'age', direction: 'asc', index: 0 }]);
+      expect(spy).toHaveBeenCalledOnce();
+    });
+
+    it('applyState applies sort and filter exactly once each', () => {
+      const { core, api } = makeCore();
+      const sortSpy = vi.spyOn(core.rowModel, 'applySort');
+      const filterSpy = vi.spyOn(core.rowModel, 'applyFilter');
+      api.applyState({
+        sort: [{ colId: 'age', direction: 'asc', index: 0 }],
+        filter: { city: { type: 'text', operator: 'equals', value: 'london' } },
+      });
+      expect(sortSpy).toHaveBeenCalledOnce();
+      expect(filterSpy).toHaveBeenCalledOnce();
+      expect(api.getSortModel()).toHaveLength(1);
+      expect(api.getFilterModel()).toHaveProperty('city');
+    });
+  });
+
   // ─── GridApi — column mutations ────────────────────────────────────────────
 
   describe('api column mutations', () => {

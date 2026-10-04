@@ -1,7 +1,6 @@
 import { GridCore } from './grid/GridCore';
 import { SelectionModel } from './selection/SelectionModel';
 import { RenderPipeline, type RenderPipelineOptions } from './render/RenderPipeline';
-import { countCellsInRanges } from './cell/cellUtils';
 import type { GridOptions, GridApi } from './types';
 
 // ─── createGrid options ───────────────────────────────────────────────────────
@@ -94,7 +93,7 @@ export function createGrid<TData = unknown>(
     },
     getActiveCell:        () => sel.focusedCell,
     getSelectedRanges:    () => [...sel.selectedRanges],
-    getSelectedCellCount: () => countCellsInRanges(sel.selectedRanges, gridOptions.columnDefs as any),
+    getSelectedCellCount: () => sel.getSelectedCellCount(),
 
     destroy() {
       pipeline.destroy();

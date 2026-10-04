@@ -475,7 +475,6 @@ export class RenderPipeline<TData = unknown> {
         case 'Escape':
           e.preventDefault();
           this._selModel.deselectAll();
-          this._selModel.selectedRanges.splice(0, this._selModel.selectedRanges.length);
           break;
         case 'F2':
           if (this._selModel.focusedCell) {

@@ -264,6 +264,77 @@ describe('createGrid', () => {
     });
   });
 
+  // ─── Cell-mode selection through the DOM ─────────────────────────────────────
+
+  describe('cell-mode selection', () => {
+    function cellEl(container: HTMLElement, displayIdx: number, colId: string): HTMLElement {
+      const row = container.querySelectorAll<HTMLElement>('.ugrid-row')[displayIdx];
+      return row.querySelector<HTMLElement>(`.ugrid-cell[data-col-id="${colId}"]`)!;
+    }
+    function mousedown(el: HTMLElement, init: MouseEventInit = {}): void {
+      el.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, ...init }));
+    }
+    /** Click one cell, shift-click another → a rectangular range. */
+    function selectRange(container: HTMLElement, from: [number, string], to: [number, string]): void {
+      mousedown(cellEl(container, ...from));
+      mousedown(cellEl(container, ...to), { shiftKey: true });
+    }
+
+    it('getSelectedCellCount works with default (non-numeric) row ids', () => {
+      const container = makeContainer();
+      const api = createGrid({ container, columnDefs: DEFS, rowData: DATA, selectionUnit: 'cell' });
+      selectRange(container, [0, 'id'], [1, 'name']);
+      expect(api.getSelectedCellCount()).toBe(4);
+    });
+
+    it('getSelectedCellCount counts display rows, not row-id distance, after sorting', () => {
+      const container = makeContainer();
+      const api = createGrid({ container, columnDefs: DEFS, rowData: DATA, selectionUnit: 'cell', getRowId: (d) => String(d.id) });
+      // Sorted by age: Eve(5), Bob(2), Dave(4), Alice(1), Carol(3) — ids 5 and 2 are adjacent on screen
+      api.setSortModel([{ colId: 'age', direction: 'asc', index: 0 }]);
+      selectRange(container, [0, 'age'], [1, 'age']);
+      expect(api.getSelectedCellCount()).toBe(2);
+    });
+
+    it('getSelectedCellCount follows visible column order after a move', () => {
+      const container = makeContainer();
+      const api = createGrid({ container, columnDefs: DEFS, rowData: DATA, selectionUnit: 'cell', getRowId: (d) => String(d.id) });
+      api.moveColumn('age', 0); // order: age, id, name
+      selectRange(container, [0, 'age'], [0, 'id']);
+      expect(api.getSelectedCellCount()).toBe(2);
+    });
+
+    it('getSelectedCellCount excludes row-header columns', () => {
+      const container = makeContainer();
+      const defs: ColumnDef<Person>[] = [{ key: 'rownum', field: 'id', rowHeader: true }, ...DEFS];
+      const api = createGrid({ container, columnDefs: defs, rowData: DATA, selectionUnit: 'cell', getRowId: (d) => String(d.id) });
+      mousedown(cellEl(container, 0, 'rownum')); // selects the entire row
+      expect(api.getSelectedCellCount()).toBe(3);
+    });
+
+    it('Escape clears ranges and removes the highlight', () => {
+      const container = makeContainer();
+      const api = createGrid({ container, columnDefs: DEFS, rowData: DATA, selectionUnit: 'cell', getRowId: (d) => String(d.id) });
+      selectRange(container, [0, 'id'], [1, 'name']);
+      expect(container.querySelectorAll('.ugrid-cell--in-range')).toHaveLength(4);
+
+      container.querySelector('.ugrid-body')!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+
+      expect(api.getSelectedRanges()).toEqual([]);
+      expect(container.querySelectorAll('.ugrid-cell--in-range')).toHaveLength(0);
+      expect(api.getActiveCell()).toEqual({ rowId: '1', colId: 'id' }); // active cell is kept
+    });
+
+    it('api.deselectAll clears the cell-range highlight', () => {
+      const container = makeContainer();
+      const api = createGrid({ container, columnDefs: DEFS, rowData: DATA, selectionUnit: 'cell', getRowId: (d) => String(d.id) });
+      selectRange(container, [0, 'id'], [1, 'name']);
+      api.deselectAll();
+      expect(api.getSelectedRanges()).toEqual([]);
+      expect(container.querySelectorAll('.ugrid-cell--in-range')).toHaveLength(0);
+    });
+  });
+
   // ─── Lifecycle / destroy ─────────────────────────────────────────────────────
 
   describe('destroy', () => {

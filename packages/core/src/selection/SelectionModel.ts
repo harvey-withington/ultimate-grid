@@ -91,9 +91,11 @@ export class SelectionModel implements ISelectionModel {
     this._emit();
   }
 
+  /** Clears selected rows and cell ranges. The focused cell is kept. */
   deselectAll(): void {
-    if (this.selectedRowIds.size === 0) return;
+    if (this.selectedRowIds.size === 0 && this.selectedRanges.length === 0) return;
     this.selectedRowIds.clear();
+    this.selectedRanges.splice(0, this.selectedRanges.length);
     this._emit();
   }
 
@@ -514,6 +516,30 @@ export class SelectionModel implements ISelectionModel {
       }
     }
     return inAnyRange ? { top, right, bottom, left } : null;
+  }
+
+  /**
+   * Total number of data cells across all selected ranges, measured in current
+   * display order (so it stays correct after sorting, filtering or column moves).
+   * Row-header columns are not counted. Overlapping ranges are counted once per
+   * range. Ranges whose start or end row is no longer displayed are skipped.
+   */
+  getSelectedCellCount(): number {
+    const cols = this._colModel?.visible;
+    if (!cols) return 0;
+    let total = 0;
+    for (const range of this.selectedRanges) {
+      const s = this._toCellDisplayPos(range.start);
+      const e = this._toCellDisplayPos(range.end);
+      if (!s || !e) continue;
+      const rowSpan = Math.abs(e.row - s.row) + 1;
+      let dataCols = 0;
+      for (let c = Math.min(s.col, e.col); c <= Math.max(s.col, e.col); c++) {
+        if (!cols[c].def?.rowHeader) dataCols++;
+      }
+      total += rowSpan * dataCols;
+    }
+    return total;
   }
 
   /**
